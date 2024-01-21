@@ -1,7 +1,8 @@
 "use client";
 
-import { ROUTES } from "@/shards/config/constants";
+import { ROUTES } from "@/shared/constants";
 import {
+  ArrowRightEndOnRectangleIcon,
   ChartBarSquareIcon,
   ClipboardDocumentListIcon,
   HomeIcon,
@@ -12,10 +13,26 @@ import clsx from "clsx";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import { ButtonLogout, MenuWrapper, MenuItem, SidebarStyled } from "./styled";
+import { useAppDispatch, useAppSelector } from "@/hooks/stores.hook";
+import {
+  logout,
+  setOpenModalLogin,
+} from "@/provider/redux/reducer/auth.reducer";
 
 export default function Sidebar() {
   const router = useRouter();
   const pathName = usePathname();
+  const currentUser = useAppSelector((state) => state.auth.userInfo);
+  const dispatch = useAppDispatch();
+
+  const handleLoginLogout = useCallback(() => {
+    if (currentUser) {
+      dispatch(logout());
+    } else {
+      dispatch(setOpenModalLogin(true));
+    }
+  }, [currentUser, dispatch]);
+
   const items = [
     {
       name: "Home",
@@ -84,9 +101,18 @@ export default function Sidebar() {
             </MenuItem>
           );
         })}
-        <ButtonLogout>
-          <PowerIcon className="h-5 w-5 text-white-900" />
-          <span>Log Out</span>
+        <ButtonLogout onClick={handleLoginLogout}>
+          {currentUser ? (
+            <div className="flex gap-1 items-center">
+              <PowerIcon className="h-5 w-5 text-white" />
+              <span>Sign Out</span>
+            </div>
+          ) : (
+            <div className="flex gap-1 items-center">
+              <ArrowRightEndOnRectangleIcon className="h-5 w-5 text-white" />
+              <span className="font-bold">Sign In</span>
+            </div>
+          )}
         </ButtonLogout>
       </MenuWrapper>
     </SidebarStyled>

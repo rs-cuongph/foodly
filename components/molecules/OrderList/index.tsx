@@ -2,7 +2,12 @@
 
 import OrderItem from "@/components/atoms/OrderItem";
 import { Scroller } from "@/components/atoms/Scroller";
+import { useAppDispatch, useAppSelector } from "@/hooks/stores.hook";
 import { useWindowSize } from "@/hooks/window-size";
+import { fetchListRoom } from "@/provider/redux/thunk/room.thunk";
+import { PAGINATION_PARAMS } from "@/shared/constants";
+import { Spinner } from "@nextui-org/react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 
 const OrderListStyled = styled.div`
@@ -24,14 +29,33 @@ const OrderListStyled = styled.div`
 
 export default function OrderList() {
   const { isMobile } = useWindowSize();
+  const dispatch = useAppDispatch();
+  const params = useAppSelector((state) => state.room.searchParams);
+  const loading = useAppSelector((state) => state.room.isFetchingList);
+  const data = useAppSelector((state) => state.room.rooms);
 
-  return (
+  useEffect(() => {
+    dispatch(fetchListRoom(params));
+  }, [params, dispatch]);
+
+  if (loading)
+    return (
+      <div className="flex p-2 justify-center bg-white rounded">
+        <Spinner color="primary" />
+      </div>
+    );
+
+  return data?.count ? (
     <Scroller height={`calc(100vh - ${isMobile ? 190 : 130}px)`}>
       <OrderListStyled>
-        <OrderItem />
-        <OrderItem />
-        <OrderItem />
+        {data.items.map((item) => (
+          <OrderItem key={item.id} data={item} />
+        ))}
       </OrderListStyled>
     </Scroller>
+  ) : (
+    <div className="bg-white p-2 rounded text-center text-[14px]">
+      Not Found
+    </div>
   );
 }

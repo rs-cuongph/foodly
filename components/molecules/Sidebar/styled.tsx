@@ -4,7 +4,7 @@ const SidebarStyled = styled.div`
   margin-left: 10px;
   width: 280px;
   height: 600px;
-  z-index: 999;
+  z-index: 9;
 
   @media (max-width: 765px) {
     position: fixed;
@@ -71,7 +71,6 @@ const ButtonLogout = styled.button`
   left: 20px;
   display: flex;
   flex-direction: row;
-  gap: 4px;
   align-items: center;
   padding: 8px 14px;
   border-radius: 28.5px;

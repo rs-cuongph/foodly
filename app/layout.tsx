@@ -6,6 +6,9 @@ import clsx from "clsx";
 import { ThemeProvider, type DefaultTheme } from "styled-components";
 import StyledComponentsRegistry from "../lib/registry";
 import { Providers } from "./providers";
+import ToastLayout from "@/components/atoms/Toast";
+import { Provider } from "react-redux";
+import ReduxProvider from "@/provider/redux/redux.provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -28,21 +31,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={clsx(
-          inter.className,
-          "min-h-screen bg-background antialiased"
-        )}
-        suppressHydrationWarning
-      >
-        <StyledComponentsRegistry>
-          {" "}
-          <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
-            <div className="relative">{children}</div>
-          </Providers>
-        </StyledComponentsRegistry>
-      </body>
-    </html>
+    <ReduxProvider>
+      <html lang="en" suppressHydrationWarning>
+        <body
+          className={clsx(
+            inter.className,
+            "min-h-screen bg-background antialiased"
+          )}
+          suppressHydrationWarning
+        >
+          <StyledComponentsRegistry>
+            <Providers
+              themeProps={{ attribute: "class", defaultTheme: "dark" }}
+            >
+              <ToastLayout />
+
+              <div className="relative">{children}</div>
+            </Providers>
+          </StyledComponentsRegistry>
+        </body>
+      </html>
+    </ReduxProvider>
   );
 }

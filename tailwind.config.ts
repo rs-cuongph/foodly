@@ -13,6 +13,9 @@ const config: Config = {
       'xs': '320px',
       // => @media (min-width: 350px) { ... }
 
+      'xss': '425px',
+      // => @media (min-width: 425px) { ... }
+
       'sm': '576px',
       // => @media (min-width: 576px) { ... }
 

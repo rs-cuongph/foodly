@@ -1,5 +1,6 @@
 import Header from "@/components/molecules/Header";
 import Main from "@/components/molecules/Main";
+import ModalLogin from "@/components/molecules/ModalLogin";
 import Sidebar from "@/components/molecules/Sidebar";
 
 export default function RootLayout({
@@ -12,6 +13,7 @@ export default function RootLayout({
       <Header />
       <Sidebar />
       <div className="content overscroll-y-auto">{children}</div>
+      <ModalLogin />
     </Main>
   );
 }

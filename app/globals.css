@@ -33,3 +33,26 @@ body {
   text-overflow: ellipsis;
   overflow: hidden;
 }
+.radius-custom span {
+  font-size: 14px !important;
+  font-weight: 400;
+}
+
+.fade-enter {
+  opacity: 0;
+  transform: translateX(100px);
+}
+.fade-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: all 200ms;
+}
+.fade-exit {
+  opacity: 1;
+  transform: translateX(0);
+}
+.fade-exit-active {
+  opacity: 0;
+  transform: translateX(100px);
+  transition: all 200ms;
+}

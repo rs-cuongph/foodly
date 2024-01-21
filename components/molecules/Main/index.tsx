@@ -1,5 +1,8 @@
 "use client";
 
+import { useAppDispatch } from "@/hooks/stores.hook";
+import { getCurrentUser } from "@/provider/redux/thunk/auth.thunk";
+import { useEffect } from "react";
 import styled from "styled-components";
 
 const MainWrapper = styled.main`
@@ -24,5 +27,10 @@ interface MainProps {
 }
 
 export default function Main({ children, className }: MainProps) {
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(getCurrentUser());
+  }, []);
   return <MainWrapper className={className}>{children}</MainWrapper>;
 }
