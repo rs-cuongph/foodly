@@ -15,6 +15,7 @@ import {
   RadioGroup,
   Select,
   SelectItem,
+  Switch,
   Textarea,
 } from "@nextui-org/react";
 import { useEffect, useState } from "react";
@@ -30,6 +31,7 @@ import {
 
 export default function ModalCreateRoom() {
   const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState(false);
   const dispatch = useAppDispatch();
   const form = useCreateRoomForm();
   const usersState = useAppSelector((state) => state.room.users);
@@ -113,9 +115,12 @@ export default function ModalCreateRoom() {
             <>
               <form onSubmit={form.handleSubmit(onSubmit)} className={""}>
                 <ModalHeader className="flex flex-col gap-1 text-center">
-                  CREATE NEW ORDER
+                  <div>CREATE NEW ORDER</div>
                 </ModalHeader>
                 <ModalBody>
+                  {/* <Switch size="sm" isSelected={mode} onValueChange={setMode}>
+                    Special Food
+                  </Switch> */}
                   <Input
                     type="text"
                     label={"Name*"}
@@ -125,14 +130,16 @@ export default function ModalCreateRoom() {
                     maxLength={100}
                     {...register("name")}
                   />
-                  <Textarea
-                    label="Description"
-                    placeholder=""
-                    isInvalid={!!errors?.description?.message?.length}
-                    errorMessage={errors?.description?.message}
-                    maxLength={250}
-                    {...register("description")}
-                  />
+                  {!mode && (
+                    <Textarea
+                      label="Description"
+                      placeholder=""
+                      isInvalid={!!errors?.description?.message?.length}
+                      errorMessage={errors?.description?.message}
+                      maxLength={250}
+                      {...register("description")}
+                    />
+                  )}
                   <div className="flex items-start gap-3">
                     <Input
                       type="datetime-local"
@@ -154,21 +161,45 @@ export default function ModalCreateRoom() {
                       {...register("public_time_end")}
                     />
                   </div>
-                  <Input
-                    type="text"
-                    label={"Price"}
-                    labelPlacement={"inside"}
-                    isInvalid={!!errors?.price?.message?.length}
-                    errorMessage={errors?.price?.message}
-                    value={watch("price")?.toString()}
-                    maxLength={7}
-                    onValueChange={(value) => {
-                      let _value = value.replace(/[^0-9]/g, "");
-                      if (!_value?.length) _value = "0";
-                      if (parseInt(_value) > 1000000) _value = "1000000";
-                      setValue("price", parseInt(_value));
-                    }}
-                  />
+                  {!mode && (
+                    <Input
+                      type="text"
+                      label={"Price"}
+                      labelPlacement={"inside"}
+                      isInvalid={!!errors?.price?.message?.length}
+                      errorMessage={errors?.price?.message}
+                      value={watch("price")?.toString()}
+                      maxLength={7}
+                      onValueChange={(value) => {
+                        let _value = value.replace(/[^0-9]/g, "");
+                        if (!_value?.length) _value = "0";
+                        if (parseInt(_value) > 1000000) _value = "1000000";
+                        setValue("price", parseInt(_value));
+                      }}
+                    />
+                  )}
+                  {/* {mode && (
+                    <div className="flex flex-col gap-1">
+                      <div className="flex gap-1">
+                        <Input
+                          type="text"
+                          size="sm"
+                          labelPlacement={"outside"}
+                          label=""
+                          placeholder={"Enter food item"}
+                          maxLength={100}
+                        />
+                        <Input
+                          type="text"
+                          size="sm"
+                          labelPlacement={"outside"}
+                          label=""
+                          maxLength={7}
+                          className="max-w-[150px]"
+                        />
+                      </div>
+                    </div>
+                  )} */}
                   <RadioGroup
                     label={"Share Scope"}
                     value={watch("share_scope")}

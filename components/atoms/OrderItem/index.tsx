@@ -22,12 +22,30 @@ import {
 import imageDefault from "@/public/images/image_default.webp";
 import { Room } from "@/provider/redux/types/room";
 import { formatCurrency } from "@/shared/helpers/currency";
+import { useAppSelector } from "@/hooks/stores.hook";
+import { InformationCircleIcon } from "@heroicons/react/24/solid";
+import { diffTime } from "@/shared/helpers/format";
+import { useEffect, useState } from "react";
+import ModalOrder from "@/components/molecules/ModalOrder";
 
 interface OrderItemProps {
   data: Room;
 }
 
 export default function OrderItem({ data }: OrderItemProps) {
+  const currentUser = useAppSelector((state) => state.auth.userInfo);
+  const [time, setTime] = useState(diffTime(data.public_time_end));
+  const [isOpenModalOrder, setOpenModalOrder] = useState(false);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setTime(diffTime(data.public_time_end));
+    }, 60000); // Update every minute
+
+    // Clear interval on component unmount
+    return () => clearInterval(intervalId);
+  }, [data.public_time_end]);
+
   return (
     <CardWrapper className="relative">
       <Image
@@ -52,7 +70,7 @@ export default function OrderItem({ data }: OrderItemProps) {
         </TotalOrder>
         <RemainingTime className="flex flex-row gap-[2px]">
           <ClockIcon className="h-4 w-4 text-primary" />
-          30&apos;
+          {time}&apos;
         </RemainingTime>
       </div>
       <div className="px-[22px] py-4">
@@ -66,18 +84,38 @@ export default function OrderItem({ data }: OrderItemProps) {
             {data.creator.username}
           </h5>
         </div>
-        <div className="mt-[20px] flex flex-row gap-2">
-          <ButtonWrapper color="primary">
-            <PencilIcon className="h-4 w-4 text-white" />
-            Edit
-          </ButtonWrapper>
+        {time !== 0 && (
+          <div className="mt-[20px] flex flex-row gap-2">
+            {data.creator.id === currentUser?.id ? (
+              <ButtonWrapper color="primary">
+                <PencilIcon className="h-4 w-4 text-white" />
+                Edit
+              </ButtonWrapper>
+            ) : (
+              <ButtonWrapper color="primary">
+                <InformationCircleIcon className="h-4 w-4 text-white" />
+                Detail
+              </ButtonWrapper>
+            )}
 
-          <ButtonWrapper color="primary" variant="bordered">
-            <ShoppingCartIcon className="h-4 w-4 text-primary" />
-            Order
-          </ButtonWrapper>
-        </div>
+            <ButtonWrapper
+              color="primary"
+              variant="bordered"
+              onClick={() => {
+                setOpenModalOrder(true);
+              }}
+            >
+              <ShoppingCartIcon className="h-4 w-4 text-primary" />
+              Order
+            </ButtonWrapper>
+          </div>
+        )}
       </div>
+      <ModalOrder
+        open={isOpenModalOrder}
+        setOpen={setOpenModalOrder}
+        data={data}
+      />
     </CardWrapper>
   );
 }

@@ -25,7 +25,7 @@ export const OrderTitle = styled.h4`
   line-height: normal;
 `;
 
-export const OrderDescription = styled.h4`
+export const OrderDescription = styled.p`
   color: #5b5b5e;
   font-size: 14.571px;
   font-style: normal;

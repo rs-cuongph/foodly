@@ -15,3 +15,14 @@ export enum SHARE_SCOPE {
   PUBLIC = 'public',
   LIMIT = 'limit'
 }
+
+export const PAYMENT_METHODS = [
+  {
+    value: "cash",
+    label: "Cash",
+  },
+  {
+    value: "vietcombank",
+    label: "Vietcombank",
+  },
+]

@@ -8,12 +8,19 @@ export interface ListUserParamsI {
   page_size?: number
 }
 
+interface PaymentSetting {
+  account_name: string
+  account_number: string
+  id: string
+  method: string
+}
 
 interface Creator {
   email: string;
   role: string;
   id: string;
   username: string
+  payment_setting: PaymentSetting[]
 }
 
 export interface Room {
