@@ -2,7 +2,7 @@ import { FormCreateRoomType } from "@/components/molecules/ModalCreateRoom/valid
 import { requestAuthenticated } from "@/shared/axios"
 import { getRoute } from "@/shared/helpers/route"
 import { createAsyncThunk } from "@reduxjs/toolkit"
-import { ListRoomI, ListUserI, ListUserParamsI, SearchParamsI } from "../types/room"
+import { ListRoomI, ListUserI, ListUserParamsI, Room, SearchParamsI } from "../types/room"
 import { PAGINATION_PARAMS } from "@/shared/constants"
 
 export const createRoom = createAsyncThunk<void, FormCreateRoomType>(
@@ -31,6 +31,17 @@ export const fetchListRoom = createAsyncThunk<ListRoomI, SearchParamsI>(
   }
 )
 
+export const fetchRoomDetail = createAsyncThunk<Room, string>(
+  'rooms/get-detail',
+  async (room_id) => {
+    return requestAuthenticated({
+      url: getRoute(`rooms/:room_id`, {
+        room_id
+      }),
+      method: 'GET',
+    })
+  }
+)
 
 export const fetchListUser = createAsyncThunk<ListUserI, ListUserParamsI>(
   'rooms/get-list-user',

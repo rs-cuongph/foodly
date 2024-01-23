@@ -1,21 +1,24 @@
-import { ListRoomI, ListUserI, SearchParamsI } from "@/provider/redux/types/room"
+import { ListRoomI, ListUserI, Room, SearchParamsI } from "@/provider/redux/types/room"
 import { PAGINATION_PARAMS } from "@/shared/constants"
 import { createSlice } from "@reduxjs/toolkit"
 import type { PayloadAction } from '@reduxjs/toolkit'
-import { createRoom, fetchListRoom, fetchListUser } from "../thunk/room.thunk"
+import { createRoom, fetchListRoom, fetchListUser, fetchRoomDetail } from "../thunk/room.thunk"
 
 interface roomState {
   isFetchingList: boolean,
   isFetchingListUser: boolean,
+  isFetchingRoom: boolean,
   isCreating: boolean,
   error?: string | null
   rooms: ListRoomI
   users: ListUserI,
   searchParams: SearchParamsI
+  room: Room
 }
 
 const initialState: roomState = {
   isFetchingList: false,
+  isFetchingRoom: false,
   isFetchingListUser: false,
   isCreating: false,
   error: null,
@@ -33,6 +36,28 @@ const initialState: roomState = {
     count: 0,
     items: []
   },
+  room: {
+    deleted_at: '',
+  room_id: '',
+  name: '',
+  description: '',
+    creator: {
+      email: '',
+      role: '',
+      id: '',
+      username: '',
+      payment_setting: [],
+  },
+  invited_people: [],
+  total_item: 0,
+  public_time_start: '',
+  public_time_end: '',
+  price: 0,
+  share_scope: '',
+  created_at: '',
+  updated_at: '',
+  id: '',
+  }
 }
 
 const roomSlice = createSlice({
@@ -59,6 +84,19 @@ const roomSlice = createSlice({
         state.isFetchingList = false;
         state.error = action.error.message;
       });
+    
+    builder
+    .addCase(fetchRoomDetail.pending, (state) => {
+      state.isFetchingRoom = true;
+    })
+    .addCase(fetchRoomDetail.fulfilled, (state, action) => {
+      state.isFetchingRoom = false;
+      state.room = action.payload;
+    })
+    .addCase(fetchRoomDetail.rejected, (state, action) => {
+      state.isFetchingRoom = false;
+      state.error = action.error.message;
+    });
 
     builder
       .addCase(createRoom.pending, (state) => {

@@ -13,8 +13,8 @@ function useWindowSize() {
     return {
         screenWidth: size[0],
         screenHeight: size[1],
-        isMobile: size[0] <= 768,
-        isDesktop: size[0] > 768
+        isMobile: size[0] < 768,
+        isDesktop: size[0] >= 768
     }
 }
 

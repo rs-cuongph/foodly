@@ -35,6 +35,7 @@ const config: Config = {
       colors: {
         white: "#fff",
         primary: "#fe724c",
+        danger: "#dc2626"
       },
       light: {
         backgroundImage: {},

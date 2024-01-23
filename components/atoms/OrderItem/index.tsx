@@ -25,8 +25,11 @@ import { formatCurrency } from "@/shared/helpers/currency";
 import { useAppSelector } from "@/hooks/stores.hook";
 import { InformationCircleIcon } from "@heroicons/react/24/solid";
 import { diffTime } from "@/shared/helpers/format";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ModalOrder from "@/components/molecules/ModalOrder";
+import { useRouter } from "next/navigation";
+import { getRoute } from "@/shared/helpers/route";
+import { ROUTES } from "@/shared/constants";
 
 interface OrderItemProps {
   data: Room;
@@ -37,6 +40,8 @@ export default function OrderItem({ data }: OrderItemProps) {
   const [time, setTime] = useState(diffTime(data.public_time_end));
   const [isOpenModalOrder, setOpenModalOrder] = useState(false);
 
+  const router = useRouter();
+
   useEffect(() => {
     const intervalId = setInterval(() => {
       setTime(diffTime(data.public_time_end));
@@ -45,6 +50,14 @@ export default function OrderItem({ data }: OrderItemProps) {
     // Clear interval on component unmount
     return () => clearInterval(intervalId);
   }, [data.public_time_end]);
+
+  const goToDetail = useCallback(() => {
+    router.push(
+      getRoute(ROUTES.MY_ORDER_DETAIL, {
+        id: data.id,
+      })
+    );
+  }, [data.id]);
 
   return (
     <CardWrapper className="relative">
@@ -86,17 +99,19 @@ export default function OrderItem({ data }: OrderItemProps) {
         </div>
         {time !== 0 && (
           <div className="mt-[20px] flex flex-row gap-2">
-            {data.creator.id === currentUser?.id ? (
-              <ButtonWrapper color="primary">
-                <PencilIcon className="h-4 w-4 text-white" />
-                Edit
-              </ButtonWrapper>
-            ) : (
-              <ButtonWrapper color="primary">
-                <InformationCircleIcon className="h-4 w-4 text-white" />
-                Detail
-              </ButtonWrapper>
-            )}
+            <ButtonWrapper color="primary" onClick={goToDetail}>
+              {data.creator.id === currentUser?.id ? (
+                <>
+                  <PencilIcon className="h-4 w-4 text-white" />
+                  Edit{" "}
+                </>
+              ) : (
+                <>
+                  <InformationCircleIcon className="h-4 w-4 text-white" />
+                  Detail
+                </>
+              )}
+            </ButtonWrapper>
 
             <ButtonWrapper
               color="primary"

@@ -3,6 +3,7 @@ export const ROUTES = {
   MY_ORDERS: '/my-orders',
   MY_CREATE_ORDERS: '/my-create-orders',
   MY_PAGE: '/my-page',
+  MY_ORDER_DETAIL: '/my-orders/:id',
   MY_ORDER_EDIT: '/my-orders/:id/edit'
 }
 

@@ -20,7 +20,7 @@ import {
   ShoppingCartIcon,
   TrashIcon,
 } from "@heroicons/react/24/solid";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Dropdown,
   DropdownItem,
@@ -37,46 +37,116 @@ import { ROUTES } from "@/shared/constants";
 import { getRoute } from "@/shared/helpers/route";
 import ModalDeleteOrder from "../ModalDeleteOrder";
 import ModalOrder from "../ModalOrder";
+import { useAppDispatch, useAppSelector } from "@/hooks/stores.hook";
+import { fetchRoomDetail } from "@/provider/redux/thunk/room.thunk";
+import { formatTime } from "@/shared/helpers/format";
+import Spinner from "@/components/atoms/Spinner";
+import { useCopyToClipboard } from "@/hooks/useCopy";
+import { showNotify } from "@/provider/redux/reducer/common.reducer";
+
+//-------------------------------------------------------------------------//
 
 export default function DetailOrder() {
   const { isMobile } = useWindowSize();
   const { id } = useParams();
-  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const [_, copy] = useCopyToClipboard();
+
   const [isOpenModalDelete, setOpenModalDelete] = useState(false);
   const [isOpenModalOrder, setOpenModalOrder] = useState(false);
+
+  const currentUser = useAppSelector((state) => state.auth.userInfo);
+  const { room, isFetchingRoom: isLoading } = useAppSelector(
+    (state) => state.room
+  );
+
+  //method
+  const isCreator = useMemo(
+    () => room.creator.id === currentUser?.id,
+    [currentUser, room]
+  );
 
   const renderMoreItem = useCallback(() => {
     return (
       <Dropdown backdrop="blur">
         <DropdownTrigger>
-          <ButtonWrapper color="default" size="sm" variant="bordered">
-            <EllipsisHorizontalIcon className="h-4 w-4 text-primary" />
-          </ButtonWrapper>
+          <EllipsisHorizontalIcon className="h-6 w-6 text-primary cursor-pointer" />
         </DropdownTrigger>
         <DropdownMenu variant="faded" aria-label="Static Actions">
-          <DropdownItem key="copy">Copy link</DropdownItem>
-          <DropdownItem key="edit">Edit file</DropdownItem>
-          <DropdownItem key="delete" className="text-danger" color="danger">
-            Delete file
+          {isCreator ? (
+            <DropdownItem
+              key="edit"
+              onClick={goToEdit}
+              startContent={<PencilIcon className="h-4 w-4 text-[#444]" />}
+            >
+              Edit
+            </DropdownItem>
+          ) : (
+            (null as unknown as React.JSX.Element) // DropdownMenu just only accept type Element
+          )}
+          <DropdownItem
+            key="share"
+            onClick={handleShare}
+            startContent={<ShareIcon className="h-4 w-4 text-[#444]" />}
+          >
+            Share
           </DropdownItem>
+          {isCreator ? (
+            <DropdownItem
+              key="remove"
+              className="text-danger"
+              onClick={openModalDeleteOrder}
+              startContent={<TrashIcon className="h-4 w-4 text-red" />}
+            >
+              Remove
+            </DropdownItem>
+          ) : (
+            (null as unknown as React.JSX.Element) // DropdownMenu just only accept type Element
+          )}
         </DropdownMenu>
       </Dropdown>
     );
-  }, []);
+  }, [isCreator]);
 
   const goToEdit = useCallback(() => {
-    router.push(
-      getRoute(ROUTES.MY_ORDER_EDIT, {
-        id: id,
-      })
-    );
-  }, [router, id]);
+    setOpenModalOrder(true);
+  }, [id]);
 
   const openModalOrder = useCallback(() => {
-    console.log("object");
     setOpenModalOrder(true);
   }, []);
-  const openModalDeleteOrder = useCallback(() => {}, []);
+
+  const openModalDeleteOrder = useCallback(() => {
+    setOpenModalDelete(true);
+  }, []);
+
+  const handleShare = useCallback(() => {
+    copy(window.location.href)
+      .then(() => {
+        dispatch(
+          showNotify({
+            messages: "Copy Link Order Successfully",
+            type: "success",
+          })
+        );
+      })
+      .catch((error) => {
+        dispatch(
+          showNotify({
+            messages: "Copy Link Order Fail",
+            type: "error",
+          })
+        );
+      });
+  }, [copy, dispatch]);
+
+  //useEffect
+  useEffect(() => {
+    if (!id) return;
+    dispatch(fetchRoomDetail(id as string));
+  }, [id]);
+
+  if (isLoading) return <Spinner />;
 
   return (
     <DetailOrderStyled className="w-[100%]">
@@ -100,50 +170,38 @@ export default function DetailOrder() {
             />
           </ImageWrapperStyled>
           <InfoHeaderStyled className="bg-white rounded-medium min-w-[250px] min-h-[150px] flex justify-between gap-1 flex-col md:flex-row">
-            <div>
-              <div className="flex gap-2 mb-2">
-                <OrderDate className="bg-gray-600 flex flex-row gap-1">
-                  <ClockIcon className="h-4 w-4 text-white" />
-                  20/11/2020
-                </OrderDate>
-                <OrderId className="bg-primary flex flex-row gap-0">
-                  <HashtagIcon className="h-4 w-4 text-white" />
-                  11111
-                </OrderId>
+            <div className="flex flex-row justify-between">
+              <div>
+                <div className="flex gap-2 mb-2">
+                  <OrderDate className="bg-gray-600 flex flex-row gap-1">
+                    <ClockIcon className="h-4 w-4 text-white" />
+                    {room.created_at && formatTime(room.created_at)}
+                  </OrderDate>
+                  <OrderId className="bg-primary flex flex-row gap-0">
+                    <HashtagIcon className="h-4 w-4 text-white" />
+                    {room.room_id}
+                  </OrderId>
+                </div>
+                <h3>{room.name}</h3>
+                <p>{room.description}</p>
               </div>
-              <h3>Chicken Hawaiian</h3>
-              <p>Chicken, Cheese and pineapple</p>
+              <>{isMobile && renderMoreItem()}</>
             </div>
-            <ActionStyled className="flex gap-[5px] max-w-[170px] flex-col">
+            <ActionStyled
+              className={`flex gap-[5px] max-w-[${
+                isMobile ? "100%" : "170px"
+              }] flex-col justify-between items-end`}
+            >
+              {!isMobile && renderMoreItem()}
+
               <ButtonWrapper
                 color="primary"
-                size="sm"
-                className="w-100"
-                onClick={goToEdit}
-              >
-                <PencilIcon className="h-4 w-4 text-white" />
-                Edit
-              </ButtonWrapper>
-              <ButtonWrapper
-                color="primary"
-                size="sm"
-                variant="bordered"
+                size={isMobile ? "sm" : "md"}
+                fullWidth
                 onClick={openModalOrder}
               >
-                <ShoppingCartIcon className="h-4 w-4 text-primary" />
+                <ShoppingCartIcon className="h-4 w-4 text-white" />
                 Order
-              </ButtonWrapper>
-              <ButtonWrapper
-                color="danger"
-                size="sm"
-                onClick={() => setOpenModalDelete(true)}
-              >
-                <TrashIcon className="h-4 w-4 text-white" />
-                Delete
-              </ButtonWrapper>
-              <ButtonWrapper color="default" size="sm">
-                <ShareIcon className="h-4 w-4 text-[#444]" />
-                Share
               </ButtonWrapper>
             </ActionStyled>
           </InfoHeaderStyled>

@@ -8,7 +8,9 @@ import { fetchListRoom } from "@/provider/redux/thunk/room.thunk";
 import { PAGINATION_PARAMS } from "@/shared/constants";
 import { Spinner } from "@nextui-org/react";
 import { useEffect, useState } from "react";
+import ImgNoProduct from "@/public/images/no-product.png";
 import styled from "styled-components";
+import Image from "next/image";
 
 const OrderListStyled = styled.div`
   padding: 10px;
@@ -55,7 +57,13 @@ export default function OrderList() {
     </Scroller>
   ) : (
     <div className="bg-white p-2 rounded text-center text-[14px]">
-      Not Found
+      <Image
+        src={ImgNoProduct}
+        width={500}
+        height={500}
+        alt="no-product"
+        className="mx-auto"
+      />
     </div>
   );
 }
