@@ -33,7 +33,13 @@ export const InfoHeaderStyled = styled.div`
 
 export const ActionStyled = styled.div``;
 
-export const ButtonWrapper = styled(Button)``;
+export const ButtonWrapper = styled(Button)`
+  border: 1px solid;
+  border-radius: 28.5px;
+  background: #fe724c;
+  box-shadow: 0px 10px 30px 0px rgba(254, 114, 76, 0.2);
+  color: #fff;
+`;
 
 export const OrderListStyled = styled.div`
   background: white;

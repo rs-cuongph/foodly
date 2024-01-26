@@ -39,7 +39,7 @@ import {
 interface ModalOrderProps {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
-  data: Room;
+  data?: Room;
 }
 export default function ModalOrder({ open, setOpen, data }: ModalOrderProps) {
   const dispatch = useAppDispatch();
@@ -53,6 +53,7 @@ export default function ModalOrder({ open, setOpen, data }: ModalOrderProps) {
   const loadingCreate = useAppSelector((state) => state.order.loadingCreate);
 
   const paymentMethods = useMemo(() => {
+    if (!data) return [];
     return data.creator.payment_setting.map((i) => ({
       value: i.id,
       method: i.method,
@@ -60,7 +61,7 @@ export default function ModalOrder({ open, setOpen, data }: ModalOrderProps) {
       account_number: i.account_number,
       label: PAYMENT_METHODS.find((it) => it.value === i.method)?.label,
     }));
-  }, [data.creator.payment_setting]);
+  }, [data?.creator?.payment_setting]);
 
   const infoQR = useMemo(() => {
     return paymentMethods.find((i) => i.value === paymentSelected);
