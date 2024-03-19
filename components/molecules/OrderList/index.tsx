@@ -5,12 +5,9 @@ import { Scroller } from "@/components/atoms/Scroller";
 import { useAppDispatch, useAppSelector } from "@/hooks/stores.hook";
 import { useWindowSize } from "@/hooks/window-size";
 import { fetchListRoom } from "@/provider/redux/thunk/room.thunk";
-import { PAGINATION_PARAMS } from "@/shared/constants";
 import { Spinner } from "@nextui-org/react";
-import { useEffect, useState } from "react";
-import ImgNoProduct from "@/public/images/no-product.png";
+import { useEffect } from "react";
 import styled from "styled-components";
-import Image from "next/image";
 
 const OrderListStyled = styled.div`
   padding: 10px;
@@ -38,7 +35,7 @@ export default function OrderList() {
 
   useEffect(() => {
     dispatch(fetchListRoom(params));
-  }, [params, dispatch]);
+  }, []);
 
   if (loading)
     return (
@@ -56,14 +53,6 @@ export default function OrderList() {
       </OrderListStyled>
     </Scroller>
   ) : (
-    <div className="bg-white p-2 rounded text-center text-[14px]">
-      <Image
-        src={ImgNoProduct}
-        width={500}
-        height={500}
-        alt="no-product"
-        className="mx-auto"
-      />
-    </div>
+    <div className="bg-white p-2 rounded text-center text-[14px]">No Data</div>
   );
 }

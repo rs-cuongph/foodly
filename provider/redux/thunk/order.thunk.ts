@@ -1,17 +1,17 @@
-import { requestAuthenticated } from "@/shared/axios"
-import { getRoute } from "@/shared/helpers/route"
-import { createAsyncThunk } from "@reduxjs/toolkit"
-import { CreateOrderI } from "../types/order"
+import { request } from "@/shared/axios";
+import { getRoute } from "@/shared/helpers/route";
+import { createAsyncThunk } from "@reduxjs/toolkit";
+import { CreateOrderI } from "../types/order";
 
 export const createOrder = createAsyncThunk<void, CreateOrderI>(
-  'order/create',
+  "order/create",
   async (data) => {
-    return requestAuthenticated({
-      url: getRoute('rooms/:room_id/orders', {
-        room_id: data.room_id
+    return request({
+      url: getRoute("rooms/:room_id/orders", {
+        room_id: data.room_id,
       }),
-      method: 'POST',
+      method: "POST",
       data,
-    })
+    });
   }
-)
+);

@@ -300,6 +300,7 @@ export default function OrderItems() {
   );
   return (
     <Table
+      aria-label=""
       isCompact
       bottomContent={bottomContent}
       bottomContentPlacement="outside"

@@ -1,28 +1,27 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
-import type { PayloadAction } from '@reduxjs/toolkit'
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import type { PayloadAction } from "@reduxjs/toolkit";
 import { delay } from "lodash";
-import { v4 as uuidv4 } from 'uuid';
-
+import { v4 as uuidv4 } from "uuid";
 
 interface NotifyState {
-  type: 'error' | 'success' | 'warning',
-  duration?: number
-  id?: string | number
-  messages: string
+  type: "error" | "success" | "warning";
+  duration?: number;
+  id?: string | number;
+  messages: string;
 }
 
 interface CommonState {
-  loading: boolean
-  notify: NotifyState[]
+  loading: boolean;
+  notify: NotifyState[];
 }
 
 const initialState: CommonState = {
   loading: false,
   notify: [],
-}
+};
 
 export const showNotify = createAsyncThunk(
-  'common/showNotify',
+  "common/showNotify",
   async (payload: NotifyState, { dispatch }) => {
     const _id = uuidv4();
     dispatch(showNotifyAction({ ...payload, id: _id }));
@@ -35,36 +34,33 @@ export const showNotify = createAsyncThunk(
 );
 
 const commonSlice = createSlice({
-  name: 'common',
+  name: "common",
   initialState,
   reducers: {
     showLoading(state) {
-      state.loading = true
+      state.loading = true;
     },
     hideLoading(state) {
-      state.loading = false
+      state.loading = false;
     },
     showNotifyAction(state, payload: PayloadAction<NotifyState>) {
-      const _id = uuidv4()
+      const _id = uuidv4();
       state.notify.push({
         ...payload.payload,
-        id: _id
-      })
+        duration: payload.payload.duration ?? 2000,
+        id: _id,
+      });
     },
     clearNotify(state, payload: PayloadAction<string | number | undefined>) {
-      if (!payload?.payload) state.notify = []
+      if (!payload?.payload) state.notify = [];
       else {
-        const index = state.notify.findIndex(i => i.id === payload.payload)
-        state.notify.splice(index, 1)
+        const index = state.notify.findIndex((i) => i.id === payload.payload);
+        state.notify.splice(index, 1);
       }
-    }
-  }
-})
+    },
+  },
+});
 
-export const {
-  showLoading,
-  hideLoading,
-  showNotifyAction,
-  clearNotify
-} = commonSlice.actions
-export default commonSlice
+export const { showLoading, hideLoading, showNotifyAction, clearNotify } =
+  commonSlice.actions;
+export default commonSlice;

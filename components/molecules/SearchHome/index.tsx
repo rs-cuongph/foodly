@@ -7,7 +7,6 @@ import { useCallback, useEffect } from "react";
 import { debounce } from "lodash";
 import { useAppDispatch } from "@/hooks/stores.hook";
 import { setParams } from "@/provider/redux/reducer/room.reducer";
-import { fetchListRoom } from "@/provider/redux/thunk/room.thunk";
 
 export default function SearchHeaderHome() {
   const dispatch = useAppDispatch();

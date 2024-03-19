@@ -49,10 +49,10 @@ export default function ModalCreateRoom() {
         description: values.description,
         price: values.price,
         public_time_start: values.public_time_start
-          ? dayjs(values.public_time_start).toString()
+          ? dayjs(values.public_time_start).toISOString()
           : undefined,
         public_time_end: values.public_time_end
-          ? dayjs(values.public_time_end).toString()
+          ? dayjs(values.public_time_end).toISOString()
           : undefined,
         invited_people: values.invited_people,
         share_scope: values.share_scope,
@@ -217,12 +217,12 @@ export default function ModalCreateRoom() {
                     >
                       Public
                     </Radio>
-                    <Radio
+                    {/* <Radio
                       value={SHARE_SCOPE.LIMIT}
                       description={"Only invited people can see this order."}
                     >
                       Limit
-                    </Radio>
+                    </Radio> */}
                   </RadioGroup>
                   {getValues("share_scope") === SHARE_SCOPE.LIMIT && (
                     <Select

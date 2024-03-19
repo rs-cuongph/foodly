@@ -24,7 +24,7 @@ import { Room } from "@/provider/redux/types/room";
 import { formatCurrency } from "@/shared/helpers/currency";
 import { useAppSelector } from "@/hooks/stores.hook";
 import { InformationCircleIcon } from "@heroicons/react/24/solid";
-import { diffTime } from "@/shared/helpers/format";
+import { diffTime, getTime } from "@/shared/helpers/format";
 import { useCallback, useEffect, useState } from "react";
 import ModalOrder from "@/components/molecules/ModalOrder";
 import { useRouter } from "next/navigation";
@@ -45,7 +45,7 @@ export default function OrderItem({ data }: OrderItemProps) {
   useEffect(() => {
     const intervalId = setInterval(() => {
       setTime(diffTime(data.public_time_end));
-    }, 60000); // Update every minute
+    }, 1000); // Update every minute
 
     // Clear interval on component unmount
     return () => clearInterval(intervalId);
@@ -83,7 +83,7 @@ export default function OrderItem({ data }: OrderItemProps) {
         </TotalOrder>
         <RemainingTime className="flex flex-row gap-[2px]">
           <ClockIcon className="h-4 w-4 text-primary" />
-          {time}&apos;
+          {getTime(time)}
         </RemainingTime>
       </div>
       <div className="px-[22px] py-4">

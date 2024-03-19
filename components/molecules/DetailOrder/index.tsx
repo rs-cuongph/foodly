@@ -33,28 +33,25 @@ import OrderItems from "./order-items";
 import { Scroller } from "@/components/atoms/Scroller";
 import { useWindowSize } from "@/hooks/window-size";
 import { useParams, useRouter } from "next/navigation";
-import { ROUTES } from "@/shared/constants";
-import { getRoute } from "@/shared/helpers/route";
 import ModalDeleteOrder from "../ModalDeleteOrder";
 import ModalOrder from "../ModalOrder";
 import { useAppDispatch, useAppSelector } from "@/hooks/stores.hook";
 import { fetchRoomDetail } from "@/provider/redux/thunk/room.thunk";
-import { formatTime } from "@/shared/helpers/format";
+import { diffTime, formatTime, getTime } from "@/shared/helpers/format";
 import Spinner from "@/components/atoms/Spinner";
 import { useCopyToClipboard } from "@/hooks/useCopy";
 import { showNotify } from "@/provider/redux/reducer/common.reducer";
-
-//-------------------------------------------------------------------------//
+import { RemainingTime } from "@/components/atoms/OrderItem/styled";
+import { ROUTES } from "@/shared/constants";
 
 export default function DetailOrder() {
+  const router = useRouter();
   const { isMobile } = useWindowSize();
   const { id } = useParams();
   const dispatch = useAppDispatch();
   const [_, copy] = useCopyToClipboard();
-
   const [isOpenModalDelete, setOpenModalDelete] = useState(false);
   const [isOpenModalOrder, setOpenModalOrder] = useState(false);
-
   const currentUser = useAppSelector((state) => state.auth.userInfo);
   const { room, isFetchingRoom: isLoading } = useAppSelector(
     (state) => state.room
@@ -65,6 +62,7 @@ export default function DetailOrder() {
     () => room.creator.id === currentUser?.id,
     [currentUser, room]
   );
+  const [time, setTime] = useState(0);
 
   const renderMoreItem = useCallback(() => {
     return (
@@ -140,11 +138,23 @@ export default function DetailOrder() {
       });
   }, [copy, dispatch]);
 
+  const onDeleteSuccess = useCallback(() => {
+    router.replace(ROUTES.HOME);
+  }, []);
+
   //useEffect
   useEffect(() => {
     if (!id) return;
     dispatch(fetchRoomDetail(id as string));
   }, [id]);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setTime(diffTime(room.public_time_end));
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [room.public_time_end]);
 
   if (isLoading) return <Spinner />;
 
@@ -152,7 +162,7 @@ export default function DetailOrder() {
     <DetailOrderStyled className="w-[100%]">
       <Scroller
         height={`calc(100vh - ${isMobile ? 160 : 80}px)`}
-        noScrollPadding
+        noScrollPadding={true}
       >
         <DetailHeaderStyled className="flex gap-5 flex-wrap">
           <ImageWrapperStyled className=" sm:max-w-[250px]">
@@ -174,13 +184,17 @@ export default function DetailOrder() {
               <div>
                 <div className="flex gap-2 mb-2">
                   <OrderDate className="bg-gray-600 flex flex-row gap-1">
-                    <ClockIcon className="h-4 w-4 text-white" />
-                    {room.created_at && formatTime(room.created_at)}
+                    {room.created_at &&
+                      formatTime(room.created_at, "YYYY-MM-DD HH:mm")}
                   </OrderDate>
                   <OrderId className="bg-primary flex flex-row gap-0">
                     <HashtagIcon className="h-4 w-4 text-white" />
                     {room.room_id}
                   </OrderId>
+                  <RemainingTime className="flex flex-row gap-[2px]">
+                    <ClockIcon className="h-4 w-4 text-primary" />
+                    {getTime(time)}
+                  </RemainingTime>
                 </div>
                 <h3>{room.name}</h3>
                 <p>{room.description}</p>
@@ -210,7 +224,12 @@ export default function DetailOrder() {
           <OrderItems />
         </OrderListStyled>
       </Scroller>
-      <ModalDeleteOrder open={isOpenModalDelete} setOpen={setOpenModalDelete} />
+      <ModalDeleteOrder
+        open={isOpenModalDelete}
+        setOpen={setOpenModalDelete}
+        roomId={room.id}
+        onDeleteSuccess={onDeleteSuccess}
+      />
       <ModalOrder open={isOpenModalOrder} setOpen={setOpenModalOrder} />
     </DetailOrderStyled>
   );

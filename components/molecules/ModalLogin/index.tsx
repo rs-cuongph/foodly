@@ -15,11 +15,9 @@ import {
 import { useEffect, useState } from "react";
 import { FormLoginType, useLoginForm } from "./validate";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
-import {
-  getCurrentUser,
-  signIn,
-  signUp,
-} from "@/provider/redux/thunk/auth.thunk";
+import { signUp } from "@/provider/redux/thunk/auth.thunk";
+import { signIn } from "next-auth/react";
+import { showNotifyAction } from "@/provider/redux/reducer/common.reducer";
 
 export default function ModalLogin() {
   const stateModalLogin = useAppSelector((state) => state.auth.openModal);
@@ -34,10 +32,24 @@ export default function ModalLogin() {
   const onSubmit = async (values: FormLoginType) => {
     try {
       if (values.is_sign_in) {
-        await dispatch(
-          signIn({
-            email: values.email,
-            password: values.password,
+        const res = await signIn("credentials", {
+          email: values.email,
+          password: values.password,
+          redirect: false,
+        });
+        if (res?.error) {
+          dispatch(
+            showNotifyAction({
+              messages: "Your email or password is incorrect",
+              type: "error",
+            })
+          );
+          return;
+        }
+        dispatch(
+          showNotifyAction({
+            messages: "Login successful",
+            type: "success",
           })
         );
       } else {
@@ -49,8 +61,8 @@ export default function ModalLogin() {
             last_name: values.last_name,
           })
         );
+        return;
       }
-      await dispatch(getCurrentUser());
       onClose();
     } catch (error) {}
   };
@@ -64,8 +76,8 @@ export default function ModalLogin() {
 
   useEffect(() => {
     reset({
-      email: undefined,
-      password: undefined,
+      email: "cuongph@runsystem.net",
+      password: "Cuong123!@#",
       first_name: undefined,
       last_name: undefined,
       is_sign_in: getValues("is_sign_in"),

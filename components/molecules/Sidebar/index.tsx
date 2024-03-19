@@ -13,25 +13,25 @@ import clsx from "clsx";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import { ButtonLogout, MenuWrapper, MenuItem, SidebarStyled } from "./styled";
-import { useAppDispatch, useAppSelector } from "@/hooks/stores.hook";
-import {
-  logout,
-  setOpenModalLogin,
-} from "@/provider/redux/reducer/auth.reducer";
+import { useAppDispatch } from "@/hooks/stores.hook";
+import { setOpenModalLogin } from "@/provider/redux/reducer/auth.reducer";
+import { signOut, useSession } from "next-auth/react";
 
 export default function Sidebar() {
   const router = useRouter();
   const pathName = usePathname();
-  const currentUser = useAppSelector((state) => state.auth.userInfo);
+  const session = useSession();
   const dispatch = useAppDispatch();
 
   const handleLoginLogout = useCallback(() => {
-    if (currentUser) {
-      dispatch(logout());
+    if (session.status === "authenticated") {
+      signOut({
+        redirect: false,
+      });
     } else {
       dispatch(setOpenModalLogin(true));
     }
-  }, [currentUser, dispatch]);
+  }, [session]);
 
   const items = [
     {
@@ -102,7 +102,7 @@ export default function Sidebar() {
           );
         })}
         <ButtonLogout onClick={handleLoginLogout}>
-          {currentUser ? (
+          {session.status === "authenticated" ? (
             <div className="flex gap-1 items-center">
               <PowerIcon className="h-5 w-5 text-white" />
               <span>Sign Out</span>

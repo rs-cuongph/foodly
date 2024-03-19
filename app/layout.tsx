@@ -9,6 +9,8 @@ import { Providers } from "./providers";
 import ToastLayout from "@/components/atoms/Toast";
 import { Provider } from "react-redux";
 import ReduxProvider from "@/provider/redux/redux.provider";
+import NextAuthProvider from "@/provider/next-auth/next-auth.provider";
+import { useEffect } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -45,8 +47,9 @@ export default function RootLayout({
               themeProps={{ attribute: "class", defaultTheme: "light" }}
             >
               <ToastLayout />
-
-              <div className="relative">{children}</div>
+              <NextAuthProvider>
+                <div className="relative">{children}</div>
+              </NextAuthProvider>
             </Providers>
           </StyledComponentsRegistry>
         </body>
