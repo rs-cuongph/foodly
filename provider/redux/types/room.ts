@@ -1,26 +1,26 @@
 export interface ListParamsI {
-  page?: number
-  page_size?: number
+  page?: number;
+  page_size?: number;
 }
 
 export interface ListUserParamsI {
-  page?: number
-  page_size?: number
+  page?: number;
+  page_size?: number;
 }
 
 interface PaymentSetting {
-  account_name: string
-  account_number: string
-  id: string
-  method: string
+  account_name: string;
+  account_number: string;
+  id: string;
+  method: string;
 }
 
 interface Creator {
   email: string;
   role: string;
   id: string;
-  username: string
-  payment_setting: PaymentSetting[]
+  username: string;
+  payment_setting: PaymentSetting[];
 }
 
 export interface Room {
@@ -40,29 +40,32 @@ export interface Room {
   id: string;
 }
 
-export interface ListRoomI {
-  count: number
-  items: Room[]
+export interface ListRoomResponseI {
+  data: Room[];
+  pagination: {
+    page: number;
+    total_record: number;
+  };
 }
 
 export interface ListUserI {
-  count: number
+  count: number;
   items: {
-    deleted_at: string | null
-    email: string
-    username: string
-    role: "USER" | "ADMIN"
-    block_to: string | null
-    created_at: string
-    updated_at: string
-    id: string
-    full_name: string
-  }[]
+    deleted_at: string | null;
+    email: string;
+    username: string;
+    role: "USER" | "ADMIN";
+    block_to: string | null;
+    created_at: string;
+    updated_at: string;
+    id: string;
+    full_name: string;
+  }[];
 }
 
 export interface SearchParamsI {
-  page?: number
-  page_size?: number
-  name?: string
-  room_id?: string
+  page?: number;
+  page_size?: number;
+  name?: string;
+  room_id?: string;
 }

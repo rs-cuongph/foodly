@@ -24,7 +24,7 @@ export default function MyOrdersPage() {
         <Input
           type="text"
           label=""
-          placeholder="Type to search..."
+          placeholder="Nhập để tìm kiếm..."
           labelPlacement="outside"
           className="w-[250px] "
           classNames={{

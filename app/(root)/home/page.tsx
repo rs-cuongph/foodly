@@ -1,5 +1,5 @@
 import ModalCreateRoom from "@/components/molecules/ModalCreateRoom";
-import OrderList from "@/components/molecules/OrderList";
+import GroupOrderList from "@/components/molecules/GroupOrderList";
 import SearchHeaderHome from "@/components/molecules/SearchHome";
 
 export default function HomePage() {
@@ -7,7 +7,7 @@ export default function HomePage() {
     <>
       <SearchHeaderHome />
       <div className="mt-5">
-        <OrderList />
+        <GroupOrderList />
       </div>
     </>
   );

@@ -1,5 +1,4 @@
 import type { NextRequest } from "next/server";
-import { STORAGE_KEYS } from "./shared/axios";
 
 export function middleware(request: NextRequest) {
   //   const session = request.cookies.get(STORAGE_KEYS.ACCESS_TOKEN)?.value;

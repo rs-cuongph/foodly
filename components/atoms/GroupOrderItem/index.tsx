@@ -5,7 +5,6 @@ import {
   ButtonWrapper,
   CardWrapper,
   Money,
-  OrderDescription,
   OrderId,
   OrderTitle,
   RemainingTime,
@@ -14,7 +13,6 @@ import {
 import {
   ClockIcon,
   HashtagIcon,
-  PencilIcon,
   ShoppingCartIcon,
   UserGroupIcon,
   UserIcon,
@@ -22,32 +20,33 @@ import {
 import imageDefault from "@/public/images/image_default.webp";
 import { Room } from "@/provider/redux/types/room";
 import { formatCurrency } from "@/shared/helpers/currency";
-import { useAppSelector } from "@/hooks/stores.hook";
+import { useAppDispatch } from "@/hooks/stores.hook";
 import { InformationCircleIcon } from "@heroicons/react/24/solid";
-import { diffTime, getTime } from "@/shared/helpers/format";
+import { getTimeFromNow } from "@/shared/helpers/format";
 import { useCallback, useEffect, useState } from "react";
 import ModalOrder from "@/components/molecules/ModalOrder";
 import { useRouter } from "next/navigation";
 import { getRoute } from "@/shared/helpers/route";
 import { ROUTES } from "@/shared/constants";
+import { useSession } from "next-auth/react";
+import { setOpenModalLogin } from "@/provider/redux/reducer/auth.reducer";
+import { showNotify } from "@/provider/redux/reducer/common.reducer";
 
 interface OrderItemProps {
   data: Room;
 }
 
-export default function OrderItem({ data }: OrderItemProps) {
-  const currentUser = useAppSelector((state) => state.auth.userInfo);
-  const [time, setTime] = useState(diffTime(data.public_time_end));
+export default function GroupOrderItem({ data }: OrderItemProps) {
+  const [time, setTime] = useState(getTimeFromNow(data.public_time_end));
   const [isOpenModalOrder, setOpenModalOrder] = useState(false);
-
+  const dispatch = useAppDispatch();
+  const session = useSession();
   const router = useRouter();
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      setTime(diffTime(data.public_time_end));
-    }, 1000); // Update every minute
-
-    // Clear interval on component unmount
+      setTime(getTimeFromNow(data.public_time_end));
+    }, 1000);
     return () => clearInterval(intervalId);
   }, [data.public_time_end]);
 
@@ -58,6 +57,24 @@ export default function OrderItem({ data }: OrderItemProps) {
       })
     );
   }, [data.id]);
+
+  const beforeAction = useCallback(
+    (action: () => void) => {
+      if (session.status === "authenticated") {
+        action();
+      } else {
+        dispatch(
+          showNotify({
+            messages: "vui lòng đăng nhập trước",
+            type: "warning",
+            duration: 2000,
+          })
+        );
+        dispatch(setOpenModalLogin(true));
+      }
+    },
+    [session]
+  );
 
   return (
     <CardWrapper className="relative">
@@ -83,14 +100,14 @@ export default function OrderItem({ data }: OrderItemProps) {
         </TotalOrder>
         <RemainingTime className="flex flex-row gap-[2px]">
           <ClockIcon className="h-4 w-4 text-primary" />
-          {getTime(time)}
+          {time}
         </RemainingTime>
       </div>
       <div className="px-[22px] py-4">
         <OrderTitle>{data.name}</OrderTitle>
-        <OrderDescription className="mt-[10px] line-clamp-2">
+        {/* <OrderDescription className="mt-[10px] line-clamp-2">
           {data.description}
-        </OrderDescription>
+        </OrderDescription> */}
         <div className="mt-[10px] flex flex-row gap-1 items-center">
           <UserIcon className="h-4 w-4 text-primary" />
           <h5 className="m-0 text-[13px] font-[500]">
@@ -100,28 +117,19 @@ export default function OrderItem({ data }: OrderItemProps) {
         {time !== 0 && (
           <div className="mt-[20px] flex flex-row gap-2">
             <ButtonWrapper color="primary" onClick={goToDetail}>
-              {data.creator.id === currentUser?.id ? (
-                <>
-                  <PencilIcon className="h-4 w-4 text-white" />
-                  Edit{" "}
-                </>
-              ) : (
-                <>
-                  <InformationCircleIcon className="h-4 w-4 text-white" />
-                  Detail
-                </>
-              )}
+              <InformationCircleIcon className="h-4 w-4 text-white" />
+              Chi Tiết
             </ButtonWrapper>
 
             <ButtonWrapper
               color="primary"
               variant="bordered"
               onClick={() => {
-                setOpenModalOrder(true);
+                beforeAction(() => setOpenModalOrder(true));
               }}
             >
               <ShoppingCartIcon className="h-4 w-4 text-primary" />
-              Order
+              Đặt
             </ButtonWrapper>
           </div>
         )}

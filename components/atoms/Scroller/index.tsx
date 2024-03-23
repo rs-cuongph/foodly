@@ -107,7 +107,7 @@ export const Scroller = ({
               childrenRef.current?.querySelectorAll(".message").length ===
               scrollLength
             ) {
-              simpleBar.getScrollElement().scrollTo({
+              simpleBar.getScrollElement()?.scrollTo({
                 behavior: "auto",
                 top: scrollHeight,
               });
@@ -116,7 +116,7 @@ export const Scroller = ({
           }, 1000);
         } else {
           const scrollHeight = simpleBar.getScrollElement()?.scrollHeight;
-          simpleBar.getScrollElement().scrollTo({
+          simpleBar.getScrollElement()?.scrollTo({
             behavior: "auto",
             top: scrollHeight,
           });

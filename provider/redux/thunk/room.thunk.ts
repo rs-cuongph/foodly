@@ -3,7 +3,7 @@ import { request } from "@/shared/axios";
 import { getRoute } from "@/shared/helpers/route";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
-  ListRoomI,
+  ListRoomResponseI,
   ListUserI,
   ListUserParamsI,
   Room,
@@ -22,7 +22,7 @@ export const createRoom = createAsyncThunk<void, FormCreateRoomType>(
   }
 );
 
-export const fetchListRoom = createAsyncThunk<ListRoomI, SearchParamsI>(
+export const fetchListRoom = createAsyncThunk<ListRoomResponseI, SearchParamsI>(
   "rooms/get-list",
   async (params) => {
     const _params = {

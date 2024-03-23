@@ -3,6 +3,8 @@ import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { getCurrentUser, signIn, signUp } from "../thunk/auth.thunk";
 import { STORAGE_KEYS } from "@/shared/constants";
+import authenticationSession from "@/shared/authenticationSession";
+import { signOut } from "next-auth/react";
 
 interface AuthState {
   userInfo: null | UserInfo["info"];
@@ -25,8 +27,13 @@ const authSlice = createSlice({
     },
     logout(state) {
       state.userInfo = null;
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("refresh_token");
+      authenticationSession.clearAuthentication();
+      if (typeof window !== "undefined") {
+        signOut({
+          callbackUrl: "/home",
+          redirect: false,
+        });
+      }
     },
   },
   extraReducers: (builder) => {

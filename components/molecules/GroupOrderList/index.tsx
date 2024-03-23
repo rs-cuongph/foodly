@@ -1,11 +1,13 @@
 "use client";
 
-import OrderItem from "@/components/atoms/OrderItem";
+import GroupOrderItem from "@/components/atoms/GroupOrderItem";
 import { Scroller } from "@/components/atoms/Scroller";
 import { useAppDispatch, useAppSelector } from "@/hooks/stores.hook";
 import { useWindowSize } from "@/hooks/window-size";
 import { fetchListRoom } from "@/provider/redux/thunk/room.thunk";
+import { Room } from "@/provider/redux/types/room";
 import { Spinner } from "@nextui-org/react";
+import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import styled from "styled-components";
 
@@ -26,16 +28,17 @@ const OrderListStyled = styled.div`
   }
 `;
 
-export default function OrderList() {
+export default function GroupOrderList() {
   const { isMobile } = useWindowSize();
+  const session = useSession();
   const dispatch = useAppDispatch();
   const params = useAppSelector((state) => state.room.searchParams);
   const loading = useAppSelector((state) => state.room.isFetchingList);
-  const data = useAppSelector((state) => state.room.rooms);
+  const rooms = useAppSelector((state) => state.room.rooms);
 
   useEffect(() => {
     dispatch(fetchListRoom(params));
-  }, []);
+  }, [session]);
 
   if (loading)
     return (
@@ -44,11 +47,11 @@ export default function OrderList() {
       </div>
     );
 
-  return data?.count ? (
+  return rooms.pagination.total_record ? (
     <Scroller height={`calc(100vh - ${isMobile ? 190 : 130}px)`}>
       <OrderListStyled>
-        {data.items.map((item) => (
-          <OrderItem key={item.id} data={item} />
+        {rooms.data.map((item: Room) => (
+          <GroupOrderItem key={item.id} data={item} />
         ))}
       </OrderListStyled>
     </Scroller>

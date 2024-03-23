@@ -19,56 +19,50 @@ import {
 } from "@nextui-org/react";
 import {
   INITIAL_VISIBLE_COLUMNS,
-  OrderItem,
   columns,
   statusColorMap,
   statusOptions,
 } from "./contants";
 import { capitalize } from "@/shared/helpers/capitalize";
-import { useState, useMemo, Key, useCallback } from "react";
+import { useState, useMemo, Key, useCallback, useEffect } from "react";
 import {
   ChevronDownIcon,
+  EllipsisVerticalIcon,
   MagnifyingGlassIcon,
+  PencilSquareIcon,
+  TrashIcon,
 } from "@heroicons/react/24/solid";
+import { ListOrderI, Order } from "@/provider/redux/types/order";
+import { useAppDispatch, useAppSelector } from "@/hooks/stores.hook";
+import { fetchListOrder } from "@/provider/redux/thunk/order.thunk";
+import { PAGINATION_PARAMS } from "@/shared/constants";
+import { formatCurrency } from "@/shared/helpers/currency";
+import { debounce } from "lodash";
 
-export default function OrderItems() {
+export default function OrderTable({ roomId }: { roomId: string }) {
   const [isLoading, setIsLoading] = useState(false);
   const loadingState = useMemo(
     () => (isLoading ? "loading" : "idle"),
     [isLoading]
   );
-
-  const [orderItems, setOrderItems] = useState<OrderItem[]>(
-    Array.from({ length: 10 }).map((_, index) => {
-      return {
-        id: index + 1,
-        name: "cuongph",
-        food_name: "Thịt rim đậu khuôn,Cá lóc kho tộ,Chả cá rim,Cải ngọt luộc",
-        quanlity: 1,
-        price: 25000,
-        amount: 25000,
-        notes: "ssssss",
-        status: "paid",
-        method_pay: "chuyển khoản",
-      };
-    })
-  );
-  const [filterValue, setFilterValue] = useState("");
+  const dispatch = useAppDispatch();
   const [selectedKeys, setSelectedKeys] = useState<Selection>(new Set([]));
   const [visibleColumns, setVisibleColumns] = useState<Selection>(
     new Set(INITIAL_VISIBLE_COLUMNS)
   );
   const [statusFilter, setStatusFilter] = useState<Selection>("all");
-  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
-    column: "age",
-    direction: "ascending",
+    column: "created_at",
+    direction: "descending",
   });
   const [page, setPage] = useState(1);
-  const pages = Math.ceil(orderItems.length / rowsPerPage);
+  const orders = useAppSelector((state) => state.order.orders);
 
-  const hasSearchFilter = Boolean(filterValue);
-
+  const totalPage = useMemo(() => {
+    return Math.ceil(
+      orders.pagination.total_record / PAGINATION_PARAMS.DEFAULT_PAGE_SIZE
+    );
+  }, [orders.pagination.total_record]);
   const headerColumns = useMemo(() => {
     if (visibleColumns === "all") return columns;
 
@@ -77,50 +71,28 @@ export default function OrderItems() {
     );
   }, [visibleColumns]);
 
-  const filteredItems = useMemo(() => {
-    let filteredUsers = [...orderItems];
+  // const filteredItems = useMemo(() => {
+  //   let filteredUsers = [...orderItems];
 
-    if (hasSearchFilter) {
-      filteredUsers = filteredUsers.filter((user) =>
-        user.name.toLowerCase().includes(filterValue.toLowerCase())
-      );
-    }
-    if (
-      statusFilter !== "all" &&
-      Array.from(statusFilter).length !== statusOptions.length
-    ) {
-      filteredUsers = filteredUsers.filter((user) =>
-        Array.from(statusFilter).includes(user.status)
-      );
-    }
+  //   if (hasSearchFilter) {
+  //     filteredUsers = filteredUsers.filter((user) =>
+  //       user.name.toLowerCase().includes(filterValue.toLowerCase())
+  //     );
+  //   }
+  //   if (
+  //     statusFilter !== "all" &&
+  //     Array.from(statusFilter).length !== statusOptions.length
+  //   ) {
+  //     filteredUsers = filteredUsers.filter((user) =>
+  //       Array.from(statusFilter).includes(user.status)
+  //     );
+  //   }
 
-    return filteredUsers;
-  }, [orderItems, filterValue, statusFilter]);
+  //   return filteredUsers;
+  // }, [orderItems, filterValue, statusFilter]);
 
-  const renderCell = useCallback((order: OrderItem, columnKey: React.Key) => {
-    const cellValue = order[columnKey as keyof OrderItem];
-
+  const renderCell = useCallback((order: Order, columnKey: string) => {
     switch (columnKey) {
-      // case "name":
-      //   return (
-      //     <User
-      //       avatarProps={{radius: "full", size: "sm", src: user.avatar}}
-      //       classNames={{
-      //         description: "text-default-500",
-      //       }}
-      //       description={user.email}
-      //       name={cellValue}
-      //     >
-      //       {user.email}
-      //     </User>
-      //   );
-      // case "role":
-      //   return (
-      //     <div className="flex flex-col">
-      //       <p className="text-bold text-small capitalize">{cellValue}</p>
-      //       <p className="text-bold text-tiny capitalize text-default-500">{user.team}</p>
-      //     </div>
-      //   );
       case "status":
         return (
           <Chip
@@ -129,47 +101,56 @@ export default function OrderItems() {
             size="sm"
             variant="dot"
           >
-            {cellValue}
+            {statusOptions.find((stt) => stt.uid === order.status)?.name}
           </Chip>
         );
-      //   case "actions":
-      //     return (
-      //       <div className="relative flex justify-end items-center gap-2">
-      //         <Dropdown className="bg-background border-1 border-default-200">
-      //           <DropdownTrigger>
-      //             <Button isIconOnly radius="full" size="sm" variant="light">
-      //               <EllipsisVerticalIcon className="h-6 w-6" />
-      //             </Button>
-      //           </DropdownTrigger>
-      //           <DropdownMenu>
-      //             <DropdownItem>View</DropdownItem>
-      //             <DropdownItem>Edit</DropdownItem>
-      //             <DropdownItem>Delete</DropdownItem>
-      //           </DropdownMenu>
-      //         </Dropdown>
-      //       </div>
-      //     );
+      case "creator": {
+        return order.creator.email;
+      }
+      case "price": {
+        return formatCurrency(order.price);
+      }
+      case "actions":
+        return (
+          <div className="relative flex justify-center items-center gap-2">
+            <PencilSquareIcon className="h-5 w-5 text-[#fe724c] cursor-pointer" />
+            <TrashIcon className="h-5 w-5 text-red-500  cursor-pointer" />
+          </div>
+        );
       default:
-        return cellValue;
+        return (order as any)[columnKey];
     }
   }, []);
+  const fetchList = async (query: ListOrderI) => {
+    dispatch(fetchListOrder(query));
+  };
 
-  const onRowsPerPageChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setRowsPerPage(Number(e.target.value));
-      setPage(1);
-    },
-    []
+  const debouncedSearch = useCallback(
+    debounce((value?: string) => {
+      if (value && page !== 1) {
+        setPage(1);
+      }
+      fetchList({
+        room_id: roomId,
+        page: 1,
+        page_size: PAGINATION_PARAMS.DEFAULT_PAGE_SIZE,
+        keywords: value,
+        sort_by: "created_at",
+        sort_type: "DESC",
+      });
+    }, 500),
+    [page]
   );
 
-  const onSearchChange = useCallback((value?: string) => {
-    if (value) {
-      setFilterValue(value);
-      setPage(1);
-    } else {
-      setFilterValue("");
-    }
-  }, []);
+  useEffect(() => {
+    fetchList({
+      room_id: roomId,
+      page,
+      page_size: PAGINATION_PARAMS.DEFAULT_PAGE_SIZE,
+      sort_by: sortDescriptor.column?.toString(),
+      sort_type: sortDescriptor.direction === "ascending" ? "ASC" : "DESC",
+    });
+  }, [sortDescriptor]);
 
   const topContent = useMemo(() => {
     return (
@@ -181,13 +162,12 @@ export default function OrderItems() {
               base: "w-full sm:max-w-[44%]",
               inputWrapper: "border-1",
             }}
-            placeholder="Search by name..."
+            placeholder="tìm kiếm..."
             size="sm"
             startContent={<MagnifyingGlassIcon className="h-4 w-4" />}
-            value={filterValue}
             variant="bordered"
-            onClear={() => setFilterValue("")}
-            onValueChange={onSearchChange}
+            onClear={() => debouncedSearch("")}
+            onValueChange={debouncedSearch}
           />
           <div className="flex gap-3">
             <Dropdown>
@@ -197,7 +177,7 @@ export default function OrderItems() {
                   size="sm"
                   variant="flat"
                 >
-                  Status
+                  Trạng thái
                 </Button>
               </DropdownTrigger>
               <DropdownMenu
@@ -222,7 +202,7 @@ export default function OrderItems() {
                   size="sm"
                   variant="flat"
                 >
-                  Columns
+                  Cột
                 </Button>
               </DropdownTrigger>
               <DropdownMenu
@@ -244,18 +224,12 @@ export default function OrderItems() {
         </div>
         <div className="flex justify-between items-center">
           <span className="text-default-400 text-small">
-            Total {orderItems.length} orders
+            Tổng {orders.pagination.total_record} đơn
           </span>
         </div>
       </div>
     );
-  }, [
-    filterValue,
-    statusFilter,
-    visibleColumns,
-    onSearchChange,
-    orderItems.length,
-  ]);
+  }, [statusFilter, visibleColumns, orders]);
 
   const bottomContent = useMemo(() => {
     return (
@@ -265,20 +239,14 @@ export default function OrderItems() {
           showControls
           showShadow
           color="primary"
-          isDisabled={hasSearchFilter}
           page={page}
-          total={pages}
+          total={totalPage}
           variant="light"
           onChange={setPage}
         />
-        {/* <span className="text-small text-default-400">
-          {selectedKeys === "all"
-            ? "All items selected"
-            : `${selectedKeys.size} of ${orderItems.length} selected`}
-        </span> */}
       </div>
     );
-  }, [selectedKeys, orderItems.length, page, pages, hasSearchFilter]);
+  }, [selectedKeys, page, totalPage, orders.data.length]);
 
   const classNames = useMemo(
     () => ({
@@ -300,7 +268,8 @@ export default function OrderItems() {
   );
   return (
     <Table
-      aria-label=""
+      aria-label="table"
+      aria-labelledby="table"
       isCompact
       bottomContent={bottomContent}
       bottomContentPlacement="outside"
@@ -325,8 +294,8 @@ export default function OrderItems() {
         )}
       </TableHeader>
       <TableBody
-        emptyContent={"No users found"}
-        items={orderItems}
+        emptyContent={"Không có dữ liệu"}
+        items={orders.data}
         loadingState={loadingState}
         loadingContent={<Spinner />}
         className="max-h-[300px]"
@@ -334,7 +303,7 @@ export default function OrderItems() {
         {(item) => (
           <TableRow key={item.id}>
             {(columnKey) => (
-              <TableCell>{renderCell(item, columnKey)}</TableCell>
+              <TableCell>{renderCell(item, columnKey.toString())}</TableCell>
             )}
           </TableRow>
         )}

@@ -29,20 +29,23 @@ import {
 } from "@nextui-org/react";
 import { OrderDate } from "@/components/atoms/MyOrderItem/styled";
 import { OrderId } from "@/components/atoms/MyOrderItem/styled";
-import OrderItems from "./order-items";
 import { Scroller } from "@/components/atoms/Scroller";
 import { useWindowSize } from "@/hooks/window-size";
 import { useParams, useRouter } from "next/navigation";
-import ModalDeleteOrder from "../ModalDeleteOrder";
-import ModalOrder from "../ModalOrder";
+import ModalDeleteOrder from "../../molecules/ModalDeleteOrder";
+import ModalOrder from "../../molecules/ModalOrder";
 import { useAppDispatch, useAppSelector } from "@/hooks/stores.hook";
 import { fetchRoomDetail } from "@/provider/redux/thunk/room.thunk";
-import { diffTime, formatTime, getTime } from "@/shared/helpers/format";
+import { formatTime, getTimeFromNow } from "@/shared/helpers/format";
 import Spinner from "@/components/atoms/Spinner";
 import { useCopyToClipboard } from "@/hooks/useCopy";
 import { showNotify } from "@/provider/redux/reducer/common.reducer";
-import { RemainingTime } from "@/components/atoms/OrderItem/styled";
+import { RemainingTime } from "@/components/atoms/GroupOrderItem/styled";
 import { ROUTES } from "@/shared/constants";
+import ModalCreateRoom from "../../molecules/ModalCreateRoom";
+import { setOpenModalCreateRoom } from "@/provider/redux/reducer/room.reducer";
+import OrderTable from "../../molecules/OrderTable";
+import { fetchListOrder } from "@/provider/redux/thunk/order.thunk";
 
 export default function DetailOrder() {
   const router = useRouter();
@@ -57,12 +60,11 @@ export default function DetailOrder() {
     (state) => state.room
   );
 
-  //method
   const isCreator = useMemo(
     () => room.creator.id === currentUser?.id,
     [currentUser, room]
   );
-  const [time, setTime] = useState(0);
+  const [time, setTime] = useState<string | number>(0);
 
   const renderMoreItem = useCallback(() => {
     return (
@@ -77,7 +79,7 @@ export default function DetailOrder() {
               onClick={goToEdit}
               startContent={<PencilIcon className="h-4 w-4 text-[#444]" />}
             >
-              Edit
+              Chỉnh sửa
             </DropdownItem>
           ) : (
             (null as unknown as React.JSX.Element) // DropdownMenu just only accept type Element
@@ -87,7 +89,7 @@ export default function DetailOrder() {
             onClick={handleShare}
             startContent={<ShareIcon className="h-4 w-4 text-[#444]" />}
           >
-            Share
+            Chia sẻ
           </DropdownItem>
           {isCreator ? (
             <DropdownItem
@@ -96,7 +98,7 @@ export default function DetailOrder() {
               onClick={openModalDeleteOrder}
               startContent={<TrashIcon className="h-4 w-4 text-red" />}
             >
-              Remove
+              Xoá
             </DropdownItem>
           ) : (
             (null as unknown as React.JSX.Element) // DropdownMenu just only accept type Element
@@ -107,7 +109,7 @@ export default function DetailOrder() {
   }, [isCreator]);
 
   const goToEdit = useCallback(() => {
-    setOpenModalOrder(true);
+    dispatch(setOpenModalCreateRoom(true));
   }, [id]);
 
   const openModalOrder = useCallback(() => {
@@ -150,7 +152,7 @@ export default function DetailOrder() {
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      setTime(diffTime(room.public_time_end));
+      setTime(getTimeFromNow(room.public_time_end));
     }, 1000);
 
     return () => clearInterval(intervalId);
@@ -193,7 +195,7 @@ export default function DetailOrder() {
                   </OrderId>
                   <RemainingTime className="flex flex-row gap-[2px]">
                     <ClockIcon className="h-4 w-4 text-primary" />
-                    {getTime(time)}
+                    {time}
                   </RemainingTime>
                 </div>
                 <h3>{room.name}</h3>
@@ -215,13 +217,13 @@ export default function DetailOrder() {
                 onClick={openModalOrder}
               >
                 <ShoppingCartIcon className="h-4 w-4 text-white" />
-                Order
+                Đặt
               </ButtonWrapper>
             </ActionStyled>
           </InfoHeaderStyled>
         </DetailHeaderStyled>
         <OrderListStyled className="mt-2">
-          <OrderItems />
+          <OrderTable roomId={room.id} />
         </OrderListStyled>
       </Scroller>
       <ModalDeleteOrder
@@ -230,7 +232,12 @@ export default function DetailOrder() {
         roomId={room.id}
         onDeleteSuccess={onDeleteSuccess}
       />
-      <ModalOrder open={isOpenModalOrder} setOpen={setOpenModalOrder} />
+      <ModalOrder
+        open={isOpenModalOrder}
+        setOpen={setOpenModalOrder}
+        data={room}
+      />
+      <ModalCreateRoom editData={room} />
     </DetailOrderStyled>
   );
 }

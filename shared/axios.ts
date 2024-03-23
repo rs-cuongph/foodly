@@ -20,6 +20,14 @@ request.interceptors.response.use(
     return response.data;
   },
   async function (error) {
-    return Promise.reject(error);
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 400) {
+        return Promise.reject({
+          errorCode: error.response.status,
+          message: error?.response?.data?.message || "ERROR",
+        });
+      }
+    }
+    throw error;
   }
 );

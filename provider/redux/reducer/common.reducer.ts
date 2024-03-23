@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { delay } from "lodash";
 import { v4 as uuidv4 } from "uuid";
+import { signUp } from "../thunk/auth.thunk";
 
 interface NotifyState {
   type: "error" | "success" | "warning";

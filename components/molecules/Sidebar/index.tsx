@@ -35,7 +35,7 @@ export default function Sidebar() {
 
   const items = [
     {
-      name: "Home",
+      name: "Trang Chủ",
       icon: <HomeIcon className="h-6 w-6 text-[#fe724c]" />,
       key: 1,
       pathRegex: new RegExp(/^\/home+$/g),
@@ -44,7 +44,7 @@ export default function Sidebar() {
       },
     },
     {
-      name: "My Orders",
+      name: "Đơn Của Tôi",
       icon: <ClipboardDocumentListIcon className="h-6 w-6 text-[#fe724c]" />,
       key: 2,
       pathRegex: new RegExp(/^\/my-orders/g),
@@ -53,16 +53,7 @@ export default function Sidebar() {
       },
     },
     {
-      name: "My Create Orders",
-      icon: <ChartBarSquareIcon className="h-6 w-6 text-[#fe724c]" />,
-      key: 3,
-      pathRegex: new RegExp(/^\/my-create-orders/g),
-      onClick: () => {
-        router.push(ROUTES.MY_CREATE_ORDERS);
-      },
-    },
-    {
-      name: "My Page",
+      name: "Cài đặt",
       icon: <UserCircleIcon className="h-6 w-6 text-[#fe724c]" />,
       key: 4,
       pathRegex: new RegExp(/^\/my-page+$/g),
@@ -105,12 +96,12 @@ export default function Sidebar() {
           {session.status === "authenticated" ? (
             <div className="flex gap-1 items-center">
               <PowerIcon className="h-5 w-5 text-white" />
-              <span>Sign Out</span>
+              <span>Đăng Xuất</span>
             </div>
           ) : (
             <div className="flex gap-1 items-center">
               <ArrowRightEndOnRectangleIcon className="h-5 w-5 text-white" />
-              <span className="font-bold">Sign In</span>
+              <span className="font-bold">Đăng Nhập</span>
             </div>
           )}
         </ButtonLogout>

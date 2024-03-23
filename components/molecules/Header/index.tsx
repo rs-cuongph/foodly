@@ -1,6 +1,7 @@
 "use client";
 import { useAppSelector } from "@/hooks/stores.hook";
 import { Avatar } from "@nextui-org/react";
+import { useSession } from "next-auth/react";
 import styled from "styled-components";
 
 const HeaderWrapper = styled.div``;
@@ -8,12 +9,11 @@ const HeaderWrapper = styled.div``;
 const AvatarWrapper = styled(Avatar)``;
 
 export default function Header() {
-  const currentUser = useAppSelector((state) => state.auth.userInfo);
-
-  return currentUser ? (
+  const session = useSession();
+  return session.status === "authenticated" ? (
     <HeaderWrapper className="absolute top-[10px] right-[10px] cursor-pointer flex flex-row items-center gap-3">
       <h3 className="m-0 text-white font-bold text-[14px]">
-        {currentUser.username}
+        {session.data.user.authenticated_data?.email}
       </h3>
       <AvatarWrapper
         isBordered

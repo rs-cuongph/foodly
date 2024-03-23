@@ -19,30 +19,46 @@ import {
   Textarea,
 } from "@nextui-org/react";
 import { useEffect, useState } from "react";
-import { PlusIcon } from "@heroicons/react/24/solid";
 import { FormCreateRoomType, useCreateRoomForm } from "./validate";
 import { SHARE_SCOPE } from "@/shared/constants";
-import { showNotify } from "@/provider/redux/reducer/common.reducer";
+import {
+  hideLoading,
+  showLoading,
+  showNotify,
+} from "@/provider/redux/reducer/common.reducer";
 import {
   createRoom,
   fetchListRoom,
   fetchListUser,
 } from "@/provider/redux/thunk/room.thunk";
+import { useSession } from "next-auth/react";
+import { setOpenModalCreateRoom } from "@/provider/redux/reducer/room.reducer";
+import { delay } from "lodash";
+import ControlledInput from "@/components/atoms/ControlledInput";
+import ControlledTextarea from "@/components/atoms/ControlledTextarea";
+import { Room } from "@/provider/redux/types/room";
 
-export default function ModalCreateRoom() {
-  const [open, setOpen] = useState(false);
+interface CreateRoomProps {
+  editData?: Room;
+}
+
+export default function ModalCreateRoom({ editData }: CreateRoomProps) {
   const [mode, setMode] = useState(false);
+  const session = useSession();
   const dispatch = useAppDispatch();
   const form = useCreateRoomForm();
   const usersState = useAppSelector((state) => state.room.users);
-  const { formState, getValues, setValue, watch, reset, register } = form;
+  const open = useAppSelector((state) => state.room.isOpenModalCreateOrder);
+  const { formState, getValues, setValue, watch, reset, register, control } =
+    form;
   const { errors } = formState;
   const [users, setUsers] = useState<{ label: string; value: string }[]>([]);
   const onClose = () => {
-    setOpen(false);
+    dispatch(setOpenModalCreateRoom(false));
   };
 
   const onSubmit = async (values: FormCreateRoomType) => {
+    dispatch(showLoading());
     const action = await dispatch(
       createRoom({
         name: values.name,
@@ -70,12 +86,13 @@ export default function ModalCreateRoom() {
         ),
         dispatch(
           showNotify({
-            messages: "Create Successfully",
+            messages: "Tạo thành công",
             type: "success",
           })
         ),
       ]);
     }
+    dispatch(hideLoading());
   };
 
   useEffect(() => {
@@ -85,92 +102,89 @@ export default function ModalCreateRoom() {
   }, [usersState]);
 
   useEffect(() => {
-    if (getValues("share_scope") === SHARE_SCOPE.LIMIT) {
-      dispatch(fetchListUser({ page: 1, page_size: 999 }));
-    }
+    // if (getValues("share_scope") === SHARE_SCOPE.LIMIT) {
+    //   dispatch(fetchListUser({ page: 1, page_size: 999 }));
+    // }
   }, [watch("share_scope")]);
 
   useEffect(() => {
     if (open) {
-      reset();
+      if (editData) {
+        reset({
+          description: editData.description,
+          name: editData.name,
+          price: editData.price,
+          public_time_start: dayjs(editData.public_time_start).format(
+            "YYYY-MM-DD HH:mm"
+          ),
+          public_time_end: dayjs(editData.public_time_end).format(
+            "YYYY-MM-DD HH:mm"
+          ),
+          share_scope: editData.share_scope as SHARE_SCOPE,
+          invited_people: [],
+        });
+      } else {
+        reset();
+      }
     }
-  }, [open, reset]);
+  }, [open]);
 
   return (
     <>
-      <Button
-        variant="shadow"
-        color="primary"
-        size="md"
-        onClick={() => {
-          setOpen(true);
-        }}
-      >
-        <PlusIcon className="h-6 w-6 text-white " />
-        <span className="text-[13px] hidden sm:block">New Order</span>
-      </Button>
-      <Modal size={"lg"} isOpen={open} onClose={onClose} backdrop="blur">
+      <Modal size="lg" isOpen={open} onClose={onClose} backdrop="blur">
         <ModalContent>
           {(onClose) => (
             <>
               <form onSubmit={form.handleSubmit(onSubmit)} className={""}>
                 <ModalHeader className="flex flex-col gap-1 text-center">
-                  <div>CREATE NEW ORDER</div>
+                  <div>{editData ? "CHỈNH SỬA" : "TẠO MỚI"} </div>
                 </ModalHeader>
                 <ModalBody>
-                  {/* <Switch size="sm" isSelected={mode} onValueChange={setMode}>
-                    Special Food
-                  </Switch> */}
-                  <Input
+                  <ControlledInput
                     type="text"
-                    label={"Name*"}
-                    labelPlacement={"inside"}
-                    isInvalid={!!errors?.name?.message?.length}
-                    errorMessage={errors?.name?.message}
-                    maxLength={100}
-                    {...register("name")}
+                    control={control}
+                    formField={"name"}
+                    errorMessage={errors?.description?.message}
                   />
                   {!mode && (
-                    <Textarea
+                    <ControlledTextarea
                       label="Description"
-                      placeholder=""
-                      isInvalid={!!errors?.description?.message?.length}
+                      control={control}
+                      formField={"description"}
                       errorMessage={errors?.description?.message}
                       maxLength={250}
-                      {...register("description")}
                     />
                   )}
                   <div className="flex items-start gap-3">
-                    <Input
+                    <ControlledInput
                       type="datetime-local"
-                      label=""
                       labelPlacement="outside"
                       className="w-[200px]"
-                      isInvalid={!!errors?.public_time_start?.message?.length}
+                      control={control}
+                      formField={"public_time_start"}
                       errorMessage={errors?.public_time_start?.message}
-                      {...register("public_time_start")}
                     />
                     <span className="mt-2">~</span>
-                    <Input
+                    <ControlledInput
                       type="datetime-local"
-                      label=""
                       labelPlacement="outside"
                       className="w-[200px]"
-                      isInvalid={!!errors?.public_time_end?.message?.length}
+                      control={control}
+                      formField={"public_time_end"}
                       errorMessage={errors?.public_time_end?.message}
-                      {...register("public_time_end")}
                     />
                   </div>
                   {!mode && (
-                    <Input
+                    <ControlledInput
                       type="text"
                       label={"Price"}
-                      labelPlacement={"inside"}
-                      isInvalid={!!errors?.price?.message?.length}
-                      errorMessage={errors?.price?.message}
-                      value={watch("price")?.toString()}
+                      labelPlacement="inside"
+                      className="w-[200px]"
+                      control={control}
+                      formField={"price"}
                       maxLength={7}
-                      onValueChange={(value) => {
+                      errorMessage={errors?.price?.message}
+                      onChange={(value) => {
                         let _value = value.replace(/[^0-9]/g, "");
                         if (!_value?.length) _value = "0";
                         if (parseInt(_value) > 1000000) _value = "1000000";
@@ -178,29 +192,7 @@ export default function ModalCreateRoom() {
                       }}
                     />
                   )}
-                  {/* {mode && (
-                    <div className="flex flex-col gap-1">
-                      <div className="flex gap-1">
-                        <Input
-                          type="text"
-                          size="sm"
-                          labelPlacement={"outside"}
-                          label=""
-                          placeholder={"Enter food item"}
-                          maxLength={100}
-                        />
-                        <Input
-                          type="text"
-                          size="sm"
-                          labelPlacement={"outside"}
-                          label=""
-                          maxLength={7}
-                          className="max-w-[150px]"
-                        />
-                      </div>
-                    </div>
-                  )} */}
-                  <RadioGroup
+                  {/* <RadioGroup
                     label={"Share Scope"}
                     value={watch("share_scope")}
                     onValueChange={(value) => {
@@ -217,13 +209,13 @@ export default function ModalCreateRoom() {
                     >
                       Public
                     </Radio>
-                    {/* <Radio
+                    <Radio
                       value={SHARE_SCOPE.LIMIT}
                       description={"Only invited people can see this order."}
                     >
                       Limit
-                    </Radio> */}
-                  </RadioGroup>
+                    </Radio>
+                  </RadioGroup> */}
                   {getValues("share_scope") === SHARE_SCOPE.LIMIT && (
                     <Select
                       label="Invite User"

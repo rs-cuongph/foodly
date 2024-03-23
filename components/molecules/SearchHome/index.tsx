@@ -2,14 +2,22 @@
 
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import ModalCreateRoom from "../ModalCreateRoom";
-import { Input } from "@nextui-org/react";
+import { Button, Input } from "@nextui-org/react";
 import { useCallback, useEffect } from "react";
 import { debounce } from "lodash";
 import { useAppDispatch } from "@/hooks/stores.hook";
-import { setParams } from "@/provider/redux/reducer/room.reducer";
+import {
+  setOpenModalCreateRoom,
+  setParams,
+} from "@/provider/redux/reducer/room.reducer";
+import { useSession } from "next-auth/react";
+import { showNotify } from "@/provider/redux/reducer/common.reducer";
+import { setOpenModalLogin } from "@/provider/redux/reducer/auth.reducer";
+import { PlusIcon } from "@heroicons/react/24/solid";
 
 export default function SearchHeaderHome() {
   const dispatch = useAppDispatch();
+  const session = useSession();
 
   const debouncedSearch = useCallback(
     debounce(async function (val: string) {
@@ -34,7 +42,7 @@ export default function SearchHeaderHome() {
       <Input
         type="text"
         label=""
-        placeholder="Type to search..."
+        placeholder="Nhập để tìm kiếm..."
         labelPlacement="outside"
         className="w-[250px] "
         classNames={{
@@ -46,6 +54,28 @@ export default function SearchHeaderHome() {
         }
       />
 
+      <Button
+        variant="shadow"
+        color="primary"
+        size="md"
+        onClick={() => {
+          if (session.status === "authenticated")
+            dispatch(setOpenModalCreateRoom(true));
+          else {
+            dispatch(
+              showNotify({
+                messages: "vui lòng đăng nhập trước",
+                type: "warning",
+                duration: 2000,
+              })
+            );
+            dispatch(setOpenModalLogin(true));
+          }
+        }}
+      >
+        <PlusIcon className="h-6 w-6 text-white " />
+        <span className="text-[13px] hidden sm:block">Đặt Nhóm Ngay</span>
+      </Button>
       <ModalCreateRoom />
     </div>
   );

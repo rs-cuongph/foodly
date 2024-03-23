@@ -6,7 +6,7 @@ import { SHARE_SCOPE } from "@/shared/constants";
 
 type FormCreateRoomType = {
   name: string;
-  description?: string;
+  description?: string | null;
   public_time_start?: string;
   public_time_end?: string;
   price?: number;

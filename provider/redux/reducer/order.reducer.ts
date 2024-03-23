@@ -1,17 +1,26 @@
-import { createSlice } from "@reduxjs/toolkit"
-import { createOrder } from "../thunk/order.thunk"
+import { createSlice } from "@reduxjs/toolkit";
+import { createOrder, fetchListOrder } from "../thunk/order.thunk";
+import { ListOrderResponseI } from "../types/order";
 interface OrderState {
-  loadingCreate: boolean
-  error: any
+  loadingCreate: boolean;
+  error: any;
+  orders: ListOrderResponseI;
 }
 
 const initialState: OrderState = {
   loadingCreate: false,
-  error: null
-}
+  error: null,
+  orders: {
+    data: [],
+    pagination: {
+      page: 1,
+      total_record: 0,
+    },
+  },
+};
 
 const orderSlice = createSlice({
-  name: 'order',
+  name: "order",
   initialState,
   reducers: {},
   extraReducers: (builder) => {
@@ -26,10 +35,11 @@ const orderSlice = createSlice({
         state.loadingCreate = false;
         state.error = action.error.message;
       });
-  }
-})
+    builder.addCase(fetchListOrder.fulfilled, (state, action) => {
+      state.orders = action.payload;
+    });
+  },
+});
 
-export const {
-
-} = orderSlice.actions
-export default orderSlice
+export const {} = orderSlice.actions;
+export default orderSlice;

@@ -22,6 +22,14 @@ export const signUp = createAsyncThunk<void, FormSignUp>(
       method: "POST",
       data: credentials,
     });
+  },
+  {
+    serializeError: (error: any) => {
+      return {
+        code: error?.errorCode,
+        message: error?.message,
+      };
+    },
   }
 );
 

@@ -1,5 +1,5 @@
 import {
-  ListRoomI,
+  ListRoomResponseI,
   ListUserI,
   Room,
   SearchParamsI,
@@ -20,10 +20,11 @@ interface roomState {
   isFetchingRoom: boolean;
   isCreating: boolean;
   error?: string | null;
-  rooms: ListRoomI;
+  rooms: ListRoomResponseI;
   users: ListUserI;
   searchParams: SearchParamsI;
   room: Room;
+  isOpenModalCreateOrder: boolean;
 }
 
 const initialState: roomState = {
@@ -39,8 +40,11 @@ const initialState: roomState = {
     room_id: "",
   },
   rooms: {
-    count: 0,
-    items: [],
+    data: [],
+    pagination: {
+      page: 1,
+      total_record: 0,
+    },
   },
   users: {
     count: 0,
@@ -68,6 +72,7 @@ const initialState: roomState = {
     updated_at: "",
     id: "",
   },
+  isOpenModalCreateOrder: false,
 };
 
 const roomSlice = createSlice({
@@ -79,6 +84,9 @@ const roomSlice = createSlice({
         ...state.searchParams,
         ...action.payload,
       };
+    },
+    setOpenModalCreateRoom: (state, action: PayloadAction<boolean>) => {
+      state.isOpenModalCreateOrder = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -135,5 +143,5 @@ const roomSlice = createSlice({
   },
 });
 
-export const { setParams } = roomSlice.actions;
+export const { setParams, setOpenModalCreateRoom } = roomSlice.actions;
 export default roomSlice;

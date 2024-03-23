@@ -3,7 +3,7 @@
 import { useAppSelector } from "@/hooks/stores.hook";
 import { clearNotify } from "@/provider/redux/reducer/common.reducer";
 import clsx from "clsx";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 
@@ -72,8 +72,19 @@ export default function ToastLayout() {
     [iconSuccess, iconDanger, iconWarning]
   );
 
+  useEffect(() => {
+    if (notify) {
+      notify.forEach((item) => {
+        item.duration &&
+          setTimeout(() => {
+            dispatch(clearNotify(item.id));
+          }, item.duration);
+      });
+    }
+  }, [notify]);
+
   return (
-    <div className="fixed top-5 right-5 z-[9]">
+    <div className="fixed top-5 right-5 z-[99999]">
       <TransitionGroup>
         {notify.map((item) => (
           <CSSTransition key={item.id} timeout={500} classNames="fade">

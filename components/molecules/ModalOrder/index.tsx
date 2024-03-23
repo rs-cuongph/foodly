@@ -1,10 +1,11 @@
-"use client";
-
 import { useAppDispatch, useAppSelector } from "@/hooks/stores.hook";
 import { showNotify } from "@/provider/redux/reducer/common.reducer";
-import { createOrder } from "@/provider/redux/thunk/order.thunk";
+import {
+  createOrder,
+  fetchListOrder,
+} from "@/provider/redux/thunk/order.thunk";
 import { Room } from "@/provider/redux/types/room";
-import { PAYMENT_METHODS } from "@/shared/constants";
+import { PAGINATION_PARAMS, PAYMENT_METHODS } from "@/shared/constants";
 import { generateQRImage } from "@/shared/helpers/generate";
 import {
   BanknotesIcon,
@@ -91,7 +92,8 @@ export default function ModalOrder({ open, setOpen, data }: ModalOrderProps) {
   const onSubmit = useCallback(async () => {
     if (step == 1) setStep(2);
     else {
-      const req = await dispatch(
+      if (!data) return;
+      const res = await dispatch(
         createOrder({
           room_id: data.id,
           content: foodSelected.join(", "),
@@ -103,12 +105,24 @@ export default function ModalOrder({ open, setOpen, data }: ModalOrderProps) {
           price: data.price,
         })
       );
-      if (req.type === "order/create/rejected") {
+
+      if (res.type === "order/create/rejected") {
       } else {
         dispatch(
           showNotify({
-            messages: "Create Order Successfully",
+            messages: "Đặt thành công",
             type: "success",
+            duration: 3000,
+          })
+        );
+        dispatch(
+          fetchListOrder({
+            room_id: data.id,
+            page: 1,
+            page_size: PAGINATION_PARAMS.DEFAULT_PAGE_SIZE,
+            keywords: "",
+            sort_by: "created_at",
+            sort_type: "DESC",
           })
         );
         setOpen(false);
@@ -151,13 +165,14 @@ export default function ModalOrder({ open, setOpen, data }: ModalOrderProps) {
         {(onClose) => (
           <>
             <ModalHeader className="flex flex-col gap-1">
-              Confirm Your Order
+              Xác Nhận Đơn Hàng
             </ModalHeader>
             <ModalBody>
               {step === 1 && (
                 <>
                   <CheckboxGroup
-                    label="please choose your food"
+                    label="Vui lòng chọn món: "
+                    // orientation="horizontal"
                     defaultValue={[]}
                     value={foodSelected}
                     onValueChange={(v) => {
@@ -166,7 +181,13 @@ export default function ModalOrder({ open, setOpen, data }: ModalOrderProps) {
                   >
                     {foodItems.map((i, index) => {
                       return (
-                        <Checkbox value={i} key={index}>
+                        <Checkbox
+                          value={i}
+                          key={index}
+                          style={{
+                            minWidth: "50%",
+                          }}
+                        >
                           {i}
                         </Checkbox>
                       );
@@ -174,9 +195,8 @@ export default function ModalOrder({ open, setOpen, data }: ModalOrderProps) {
                   </CheckboxGroup>
                   <Input
                     type="text"
-                    label={"Quanlity"}
+                    label={"Số lượng"}
                     labelPlacement={"outside"}
-                    placeholder="Enter quanlity"
                     value={quanlity}
                     maxLength={7}
                     classNames={{
@@ -254,7 +274,7 @@ export default function ModalOrder({ open, setOpen, data }: ModalOrderProps) {
                         infoQR.method,
                         infoQR.account_number,
                         infoQR.account_name,
-                        data.price,
+                        data?.price || 0,
                         ""
                       )}
                     />
