@@ -16,6 +16,7 @@ import {
   DropdownMenu,
   Chip,
   Spinner,
+  Tooltip,
 } from "@nextui-org/react";
 import {
   INITIAL_VISIBLE_COLUMNS,
@@ -24,23 +25,37 @@ import {
   statusOptions,
 } from "./contants";
 import { capitalize } from "@/shared/helpers/capitalize";
-import { useState, useMemo, Key, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import {
   ChevronDownIcon,
-  EllipsisVerticalIcon,
   MagnifyingGlassIcon,
   PencilSquareIcon,
+  QuestionMarkCircleIcon,
   TrashIcon,
 } from "@heroicons/react/24/solid";
-import { ListOrderI, Order } from "@/provider/redux/types/order";
+import { Order } from "@/provider/redux/types/order";
 import { useAppDispatch, useAppSelector } from "@/hooks/stores.hook";
-import { fetchListOrder } from "@/provider/redux/thunk/order.thunk";
+import {
+  deleteOrder,
+  fetchListOrder,
+} from "@/provider/redux/thunk/order.thunk";
 import { PAGINATION_PARAMS } from "@/shared/constants";
 import { formatCurrency } from "@/shared/helpers/currency";
-import { debounce } from "lodash";
+import ModalDeleteOrder from "@/components/molecules/ModalDelete";
+import { setSearchQuery } from "@/provider/redux/reducer/order.reducer";
+import ModalOrder from "../ModalOrder";
+import { Room } from "@/provider/redux/types/room";
+import { useSession } from "next-auth/react";
 
-export default function OrderTable({ roomId }: { roomId: string }) {
-  const [isLoading, setIsLoading] = useState(false);
+interface OrderTableProps {
+  data: Room;
+}
+export default function OrderTable({ data }: OrderTableProps) {
+  const isLoading = useAppSelector((state) => state.order.loadingList);
+  const searchQuery = useAppSelector((state) => state.order.searchQuery);
+  const session = useSession();
+  const [isOpenModalOrder, setOpenModalOrder] = useState(false);
+  const [order, setOrder] = useState<Order | undefined>(undefined);
   const loadingState = useMemo(
     () => (isLoading ? "loading" : "idle"),
     [isLoading]
@@ -50,7 +65,10 @@ export default function OrderTable({ roomId }: { roomId: string }) {
   const [visibleColumns, setVisibleColumns] = useState<Selection>(
     new Set(INITIAL_VISIBLE_COLUMNS)
   );
-  const [statusFilter, setStatusFilter] = useState<Selection>("all");
+  const [isOpenModalDeleteOrder, setOpenModalDeleteOrder] = useState(false);
+  const [statusFilter, setStatusFilter] = useState(
+    new Set(statusOptions.map((i) => i.uid))
+  );
   const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
     column: "created_at",
     direction: "descending",
@@ -71,29 +89,10 @@ export default function OrderTable({ roomId }: { roomId: string }) {
     );
   }, [visibleColumns]);
 
-  // const filteredItems = useMemo(() => {
-  //   let filteredUsers = [...orderItems];
-
-  //   if (hasSearchFilter) {
-  //     filteredUsers = filteredUsers.filter((user) =>
-  //       user.name.toLowerCase().includes(filterValue.toLowerCase())
-  //     );
-  //   }
-  //   if (
-  //     statusFilter !== "all" &&
-  //     Array.from(statusFilter).length !== statusOptions.length
-  //   ) {
-  //     filteredUsers = filteredUsers.filter((user) =>
-  //       Array.from(statusFilter).includes(user.status)
-  //     );
-  //   }
-
-  //   return filteredUsers;
-  // }, [orderItems, filterValue, statusFilter]);
-
   const renderCell = useCallback((order: Order, columnKey: string) => {
     switch (columnKey) {
-      case "status":
+      case "status": {
+        const status = statusOptions.find((stt) => stt.uid === order.status);
         return (
           <Chip
             className="capitalize border-none gap-1 text-default-600"
@@ -101,9 +100,24 @@ export default function OrderTable({ roomId }: { roomId: string }) {
             size="sm"
             variant="dot"
           >
-            {statusOptions.find((stt) => stt.uid === order.status)?.name}
+            <div className="flex items-center gap-1">
+              {status?.name}
+              {status?.note && (
+                <Tooltip
+                  content={status?.note}
+                  color="default"
+                  classNames={{
+                    content: ["py-2 px-4 shadow-xl", "text-black bg-gray-50"],
+                  }}
+                >
+                  <QuestionMarkCircleIcon className="h-4 w-4 text-gray-500 cursor-pointer" />
+                </Tooltip>
+              )}
+            </div>
           </Chip>
         );
+      }
+
       case "creator": {
         return order.creator.email;
       }
@@ -113,44 +127,72 @@ export default function OrderTable({ roomId }: { roomId: string }) {
       case "actions":
         return (
           <div className="relative flex justify-center items-center gap-2">
-            <PencilSquareIcon className="h-5 w-5 text-[#fe724c] cursor-pointer" />
-            <TrashIcon className="h-5 w-5 text-red-500  cursor-pointer" />
+            {session.data?.user.authenticated_data.id === data.creator.id && (
+              <>
+                <Button
+                  onClick={() => handleOpenModalEdit(order)}
+                  color="primary"
+                  variant={"light"}
+                  isIconOnly
+                >
+                  <PencilSquareIcon className="h-5 w-5 text-[#fe724c]" />
+                </Button>
+
+                <Button
+                  onClick={() => handleOpenModalDelete(order)}
+                  color="danger"
+                  variant={"light"}
+                  isIconOnly
+                >
+                  <TrashIcon className="h-5 w-5 text-red-500 cursor-pointer" />
+                </Button>
+              </>
+            )}
           </div>
         );
       default:
         return (order as any)[columnKey];
     }
   }, []);
-  const fetchList = async (query: ListOrderI) => {
-    dispatch(fetchListOrder(query));
+
+  const handleOpenModalEdit = useCallback((order: Order) => {
+    setOrder(order);
+    setOpenModalOrder(true);
+  }, []);
+
+  const handleOpenModalDelete = useCallback((order: Order) => {
+    if (order.status !== "processing") return;
+    setOrder(order);
+    setOpenModalDeleteOrder(true);
+  }, []);
+
+  const onDeleteOrder = async () => {
+    if (!order) return;
+    const res = await dispatch(
+      deleteOrder({ room_id: data.id, order_id: order.id })
+    );
+
+    if (res.type === "order/delete/fulfilled") {
+      dispatch(fetchListOrder(searchQuery));
+      setOpenModalDeleteOrder(false);
+    }
   };
 
-  const debouncedSearch = useCallback(
-    debounce((value?: string) => {
-      if (value && page !== 1) {
-        setPage(1);
-      }
-      fetchList({
-        room_id: roomId,
-        page: 1,
-        page_size: PAGINATION_PARAMS.DEFAULT_PAGE_SIZE,
-        keywords: value,
-        sort_by: "created_at",
-        sort_type: "DESC",
-      });
-    }, 500),
-    [page]
-  );
+  useEffect(() => {
+    dispatch(fetchListOrder(searchQuery));
+  }, [searchQuery]);
 
   useEffect(() => {
-    fetchList({
-      room_id: roomId,
-      page,
-      page_size: PAGINATION_PARAMS.DEFAULT_PAGE_SIZE,
-      sort_by: sortDescriptor.column?.toString(),
-      sort_type: sortDescriptor.direction === "ascending" ? "ASC" : "DESC",
-    });
-  }, [sortDescriptor]);
+    dispatch(
+      setSearchQuery({
+        page,
+        status: Array.from(statusFilter),
+        sort_by: sortDescriptor.column?.toString(),
+        sort_type: sortDescriptor.direction === "ascending" ? "ASC" : "DESC",
+        room_id: data.id,
+      })
+    );
+  }, [page, statusFilter, sortDescriptor]);
 
   const topContent = useMemo(() => {
     return (
@@ -166,8 +208,15 @@ export default function OrderTable({ roomId }: { roomId: string }) {
             size="sm"
             startContent={<MagnifyingGlassIcon className="h-4 w-4" />}
             variant="bordered"
-            onClear={() => debouncedSearch("")}
-            onValueChange={debouncedSearch}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                dispatch(
+                  setSearchQuery({
+                    keywords: (e.target as any).value,
+                  })
+                );
+              }
+            }}
           />
           <div className="flex gap-3">
             <Dropdown>
@@ -186,7 +235,11 @@ export default function OrderTable({ roomId }: { roomId: string }) {
                 closeOnSelect={false}
                 selectedKeys={statusFilter}
                 selectionMode="multiple"
-                onSelectionChange={setStatusFilter}
+                onSelectionChange={(k) =>
+                  setStatusFilter(
+                    new Set(Array.from(k).map((item) => item.toString()))
+                  )
+                }
               >
                 {statusOptions.map((status) => (
                   <DropdownItem key={status.uid} className="capitalize">
@@ -238,15 +291,15 @@ export default function OrderTable({ roomId }: { roomId: string }) {
           isCompact
           showControls
           showShadow
+          initialPage={1}
           color="primary"
-          page={page}
           total={totalPage}
           variant="light"
           onChange={setPage}
         />
       </div>
     );
-  }, [selectedKeys, page, totalPage, orders.data.length]);
+  }, [page, totalPage]);
 
   const classNames = useMemo(
     () => ({
@@ -266,48 +319,61 @@ export default function OrderTable({ roomId }: { roomId: string }) {
     }),
     []
   );
+
   return (
-    <Table
-      aria-label="table"
-      aria-labelledby="table"
-      isCompact
-      bottomContent={bottomContent}
-      bottomContentPlacement="outside"
-      classNames={classNames}
-      selectedKeys={selectedKeys}
-      //   selectionMode="multiple"
-      sortDescriptor={sortDescriptor}
-      topContent={topContent}
-      topContentPlacement="outside"
-      onSelectionChange={setSelectedKeys}
-      onSortChange={setSortDescriptor}
-    >
-      <TableHeader columns={headerColumns}>
-        {(column) => (
-          <TableColumn
-            key={column.uid}
-            align={column.uid === "actions" ? "center" : "start"}
-            allowsSorting={column.sortable}
-          >
-            {column.name}
-          </TableColumn>
-        )}
-      </TableHeader>
-      <TableBody
-        emptyContent={"Không có dữ liệu"}
-        items={orders.data}
-        loadingState={loadingState}
-        loadingContent={<Spinner />}
-        className="max-h-[300px]"
+    <div>
+      <Table
+        aria-label="table"
+        aria-labelledby="table"
+        isCompact
+        bottomContent={bottomContent}
+        bottomContentPlacement="outside"
+        classNames={classNames}
+        selectedKeys={selectedKeys}
+        sortDescriptor={sortDescriptor}
+        topContent={topContent}
+        topContentPlacement="outside"
+        onSelectionChange={setSelectedKeys}
+        onSortChange={setSortDescriptor}
       >
-        {(item) => (
-          <TableRow key={item.id}>
-            {(columnKey) => (
-              <TableCell>{renderCell(item, columnKey.toString())}</TableCell>
-            )}
-          </TableRow>
-        )}
-      </TableBody>
-    </Table>
+        <TableHeader columns={headerColumns}>
+          {(column) => (
+            <TableColumn
+              key={column.uid}
+              align={column.uid === "actions" ? "center" : "start"}
+              allowsSorting={column.sortable}
+            >
+              {column.name}
+            </TableColumn>
+          )}
+        </TableHeader>
+        <TableBody
+          emptyContent={"Không có dữ liệu"}
+          items={orders.data}
+          loadingState={loadingState}
+          loadingContent={<Spinner />}
+          className="max-h-[300px]"
+        >
+          {(item) => (
+            <TableRow key={item.id}>
+              {(columnKey) => (
+                <TableCell>{renderCell(item, columnKey.toString())}</TableCell>
+              )}
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+      <ModalDeleteOrder
+        open={isOpenModalDeleteOrder}
+        setOpen={setOpenModalDeleteOrder}
+        onSubmit={onDeleteOrder}
+      />
+      <ModalOrder
+        open={isOpenModalOrder}
+        setOpen={setOpenModalOrder}
+        data={data}
+        order={order}
+      />
+    </div>
   );
 }

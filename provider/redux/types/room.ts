@@ -66,6 +66,5 @@ export interface ListUserI {
 export interface SearchParamsI {
   page?: number;
   page_size?: number;
-  name?: string;
-  room_id?: string;
+  keywords?: string;
 }

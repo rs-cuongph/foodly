@@ -1,7 +1,6 @@
 "use client";
 
-import { useAppDispatch } from "@/hooks/stores.hook";
-import { deleteRoom } from "@/provider/redux/thunk/room.thunk";
+import { useAppDispatch, useAppSelector } from "@/hooks/stores.hook";
 import {
   Button,
   Modal,
@@ -12,30 +11,17 @@ import {
 } from "@nextui-org/react";
 import { Dispatch, SetStateAction, useCallback } from "react";
 
-interface ModalDeleteOrderProps {
-  roomId: string;
+interface ModalDeleteProps {
   open: boolean;
-  onDeleteSuccess: () => void;
+  onSubmit: () => void;
   setOpen: Dispatch<SetStateAction<boolean>>;
 }
-export default function ModalDeleteOrder({
-  roomId,
-  onDeleteSuccess,
-  ...rest
-}: ModalDeleteOrderProps) {
-  const dispatch = useAppDispatch();
+export default function ModalDelete({ onSubmit, ...rest }: ModalDeleteProps) {
+  const loading = useAppSelector((state) => state.common.loading);
 
   const onClose = useCallback(() => {
     rest.setOpen(false);
   }, [rest]);
-
-  const onSubmit = async () => {
-    const res = await dispatch(deleteRoom(roomId));
-    if (res.type === "room/delete/fulfilled") {
-      rest.setOpen(false);
-      onDeleteSuccess();
-    }
-  };
 
   return (
     <Modal
@@ -48,17 +34,17 @@ export default function ModalDeleteOrder({
         {(onClose) => (
           <>
             <ModalHeader className="flex flex-col gap-1">
-              Confirm Deletion
+              Xác nhận xoá
             </ModalHeader>
             <ModalBody>
-              <p>Do you really want to delete this order?</p>
+              <p>Bạn thực sự có muốn xoá không ?</p>
             </ModalBody>
             <ModalFooter>
               <Button color="danger" variant="light" onPress={onClose}>
-                Close
+                Đóng
               </Button>
-              <Button color="primary" onPress={onSubmit}>
-                Submit
+              <Button color="primary" onPress={onSubmit} isLoading={loading}>
+                Xác nhận
               </Button>
             </ModalFooter>
           </>

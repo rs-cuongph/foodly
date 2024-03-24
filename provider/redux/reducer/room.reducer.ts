@@ -9,6 +9,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import {
   createRoom,
+  fetchListMyRoom,
   fetchListRoom,
   fetchListUser,
   fetchRoomDetail,
@@ -36,8 +37,7 @@ const initialState: roomState = {
   searchParams: {
     page: 1,
     page_size: PAGINATION_PARAMS.DEFAULT_PAGE_SIZE,
-    name: "",
-    room_id: "",
+    keywords: "",
   },
   rooms: {
     data: [],
@@ -79,6 +79,9 @@ const roomSlice = createSlice({
   name: "room",
   initialState,
   reducers: {
+    resetParams: (state) => {
+      state.searchParams = initialState.searchParams;
+    },
     setParams: (state, action: PayloadAction<SearchParamsI>) => {
       state.searchParams = {
         ...state.searchParams,
@@ -99,6 +102,19 @@ const roomSlice = createSlice({
         state.rooms = action.payload;
       })
       .addCase(fetchListRoom.rejected, (state, action) => {
+        state.isFetchingList = false;
+        state.error = action.error.message;
+      });
+
+    builder
+      .addCase(fetchListMyRoom.pending, (state) => {
+        state.isFetchingList = true;
+      })
+      .addCase(fetchListMyRoom.fulfilled, (state, action) => {
+        state.isFetchingList = false;
+        state.rooms = action.payload;
+      })
+      .addCase(fetchListMyRoom.rejected, (state, action) => {
         state.isFetchingList = false;
         state.error = action.error.message;
       });
@@ -143,5 +159,6 @@ const roomSlice = createSlice({
   },
 });
 
-export const { setParams, setOpenModalCreateRoom } = roomSlice.actions;
+export const { setParams, setOpenModalCreateRoom, resetParams } =
+  roomSlice.actions;
 export default roomSlice;

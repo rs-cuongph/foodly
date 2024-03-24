@@ -1,15 +1,16 @@
 export const ROUTES = {
   HOME: "/home",
+  LIST_GROUP_ORDER: "/orders",
+  DETAIL_GROUP_ORDER: "/orders/:id",
   MY_ORDERS: "/my-orders",
-  MY_CREATE_ORDERS: "/my-create-orders",
+  HISTORY: "/credit-histories",
+  DETAIL_HISTORY: "/histories/:id",
   MY_PAGE: "/my-page",
-  MY_ORDER_DETAIL: "/my-orders/:id",
-  MY_ORDER_EDIT: "/my-orders/:id/edit",
 };
 
 export const PAGINATION_PARAMS = {
   DEFAULT_PAGE: 1,
-  DEFAULT_PAGE_SIZE: 25,
+  DEFAULT_PAGE_SIZE: 50,
 };
 
 export enum SHARE_SCOPE {

@@ -1,11 +1,15 @@
 import { useAppDispatch, useAppSelector } from "@/hooks/stores.hook";
-import { showNotify } from "@/provider/redux/reducer/common.reducer";
 import {
-  createOrder,
-  fetchListOrder,
-} from "@/provider/redux/thunk/order.thunk";
+  hideLoading,
+  showLoading,
+  showNotify,
+} from "@/provider/redux/reducer/common.reducer";
+import { setSearchQuery } from "@/provider/redux/reducer/order.reducer";
+import { setParams } from "@/provider/redux/reducer/room.reducer";
+import { createOrder, editOrder } from "@/provider/redux/thunk/order.thunk";
+import { Order } from "@/provider/redux/types/order";
 import { Room } from "@/provider/redux/types/room";
-import { PAGINATION_PARAMS, PAYMENT_METHODS } from "@/shared/constants";
+import { PAYMENT_METHODS } from "@/shared/constants";
 import { generateQRImage } from "@/shared/helpers/generate";
 import {
   BanknotesIcon,
@@ -28,6 +32,7 @@ import {
   SelectItem,
 } from "@nextui-org/react";
 import clsx from "clsx";
+import { delay } from "lodash";
 import {
   Dispatch,
   SetStateAction,
@@ -41,8 +46,14 @@ interface ModalOrderProps {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
   data?: Room;
+  order?: Order;
 }
-export default function ModalOrder({ open, setOpen, data }: ModalOrderProps) {
+export default function ModalOrder({
+  open,
+  setOpen,
+  data,
+  order,
+}: ModalOrderProps) {
   const dispatch = useAppDispatch();
   const [step, setStep] = useState(1);
   const [quanlity, setQuanlity] = useState("1");
@@ -51,7 +62,7 @@ export default function ModalOrder({ open, setOpen, data }: ModalOrderProps) {
   );
   const [foodSelected, setFoodSelected] = useState<string[]>([]);
   const [paymentSelected, setPaymentSelected] = useState<string>("");
-  const loadingCreate = useAppSelector((state) => state.order.loadingCreate);
+  const loading = useAppSelector((state) => state.common.loading);
 
   const paymentMethods = useMemo(() => {
     if (!data) return [];
@@ -89,10 +100,11 @@ export default function ModalOrder({ open, setOpen, data }: ModalOrderProps) {
     [step, setStep]
   );
 
-  const onSubmit = useCallback(async () => {
+  const onCreate = useCallback(async () => {
     if (step == 1) setStep(2);
     else {
       if (!data) return;
+      dispatch(showLoading());
       const res = await dispatch(
         createOrder({
           room_id: data.id,
@@ -116,17 +128,19 @@ export default function ModalOrder({ open, setOpen, data }: ModalOrderProps) {
           })
         );
         dispatch(
-          fetchListOrder({
+          setSearchQuery({
             room_id: data.id,
             page: 1,
-            page_size: PAGINATION_PARAMS.DEFAULT_PAGE_SIZE,
-            keywords: "",
-            sort_by: "created_at",
-            sort_type: "DESC",
+          })
+        );
+        dispatch(
+          setParams({
+            page: 1,
           })
         );
         setOpen(false);
       }
+      dispatch(hideLoading());
     }
   }, [
     step,
@@ -140,6 +154,37 @@ export default function ModalOrder({ open, setOpen, data }: ModalOrderProps) {
     quanlity,
   ]);
 
+  const onEdit = useCallback(async () => {
+    if (!data || !order) return;
+    dispatch(showLoading());
+    const res = await dispatch(
+      editOrder({
+        room_id: data.id,
+        order_id: order.id,
+        content: foodSelected.join(", "),
+        quanlity: parseInt(quanlity),
+        price: order.price,
+      })
+    );
+    if (res.type === "order/edit/fulfilled") {
+      dispatch(
+        showNotify({
+          messages: "Sửa thành công",
+          type: "success",
+          duration: 3000,
+        })
+      );
+      dispatch(
+        setSearchQuery({
+          room_id: data.id,
+          page: 1,
+        })
+      );
+      setOpen(false);
+    }
+    dispatch(hideLoading());
+  }, [data, order, quanlity, foodSelected]);
+
   const handleSelectionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setPaymentSelected(e.target.value);
   };
@@ -147,11 +192,27 @@ export default function ModalOrder({ open, setOpen, data }: ModalOrderProps) {
   useEffect(() => {
     if (open) {
       setStep(1);
-      setPaymentSelected("");
-      setFoodSelected([]);
-      setQuanlity("1");
+      if (order) {
+        setQuanlity(order.quanlity.toString());
+        setFoodSelected(order.content.split(", "));
+      } else {
+        setPaymentSelected("");
+        setFoodSelected([]);
+        setQuanlity("1");
+      }
     }
-  }, [open]);
+  }, [open, order]);
+
+  useEffect(() => {
+    let timerId = 0;
+    if (step === 2) {
+      dispatch(showLoading());
+      timerId = delay(() => {
+        dispatch(hideLoading());
+      }, 2000);
+    }
+    return () => clearTimeout(timerId);
+  }, [step]);
 
   return (
     <Modal
@@ -165,7 +226,7 @@ export default function ModalOrder({ open, setOpen, data }: ModalOrderProps) {
         {(onClose) => (
           <>
             <ModalHeader className="flex flex-col gap-1">
-              Xác Nhận Đơn Hàng
+              {order ? "Chỉnh Sửa Đơn" : " Xác Nhận Đơn"}
             </ModalHeader>
             <ModalBody>
               {step === 1 && (
@@ -288,28 +349,36 @@ export default function ModalOrder({ open, setOpen, data }: ModalOrderProps) {
                 variant="light"
                 onClick={() => handleClose(onClose)}
               >
-                {step === 1 ? "Close" : "Back"}
+                {order ? "Đóng" : step === 1 ? "Đóng" : "Trở Lại"}
               </Button>
-              <Button
-                color="primary"
-                onClick={onSubmit}
-                className={clsx(
-                  ((step === 1 && foodSelected.length === 0) ||
-                    (step === 2 && paymentSelected.length === 0)) &&
-                    "opacity-60"
-                )}
-                disabled={
-                  (step === 1 && foodSelected.length === 0) ||
-                  (step === 2 && paymentSelected.length === 0)
-                }
-                isLoading={loadingCreate}
-              >
-                {step === 1 && (
-                  <ChevronDoubleRightIcon className="h-4 w-4 text-white" />
-                )}
-                {step === 2 && <BanknotesIcon className="h-4 w-4 text-white" />}
-                {step === 1 ? "Next" : "I have paid"}
-              </Button>
+              {order ? (
+                <Button color="primary" onClick={onEdit}>
+                  Lưu
+                </Button>
+              ) : (
+                <Button
+                  color="primary"
+                  onClick={onCreate}
+                  className={clsx(
+                    ((step === 1 && foodSelected.length === 0) ||
+                      (step === 2 && paymentSelected.length === 0)) &&
+                      "opacity-60"
+                  )}
+                  disabled={
+                    (step === 1 && foodSelected.length === 0) ||
+                    (step === 2 && paymentSelected.length === 0)
+                  }
+                  isLoading={loading}
+                >
+                  {step === 1 && (
+                    <ChevronDoubleRightIcon className="h-4 w-4 text-white" />
+                  )}
+                  {step === 2 && (
+                    <BanknotesIcon className="h-4 w-4 text-white" />
+                  )}
+                  {step === 1 ? "Tiếp" : "Đã Thanh Toán"}
+                </Button>
+              )}
             </ModalFooter>
           </>
         )}

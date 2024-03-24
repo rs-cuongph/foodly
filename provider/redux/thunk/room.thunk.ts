@@ -37,6 +37,21 @@ export const fetchListRoom = createAsyncThunk<ListRoomResponseI, SearchParamsI>(
   }
 );
 
+export const fetchListMyRoom = createAsyncThunk<
+  ListRoomResponseI,
+  SearchParamsI
+>("rooms/get-my-list", async (params) => {
+  const _params = {
+    page_size: PAGINATION_PARAMS.DEFAULT_PAGE_SIZE,
+    ...params,
+  };
+  return request({
+    url: getRoute(`rooms/mine`),
+    method: "GET",
+    params: _params,
+  });
+});
+
 export const fetchRoomDetail = createAsyncThunk<Room, string>(
   "rooms/get-detail",
   async (room_id) => {

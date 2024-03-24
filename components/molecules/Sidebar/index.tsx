@@ -7,6 +7,7 @@ import {
   ClipboardDocumentListIcon,
   HomeIcon,
   PowerIcon,
+  RectangleGroupIcon,
   UserCircleIcon,
 } from "@heroicons/react/24/solid";
 import clsx from "clsx";
@@ -44,16 +45,25 @@ export default function Sidebar() {
       },
     },
     {
-      name: "Đơn Của Tôi",
+      name: "Lịch Sử",
       icon: <ClipboardDocumentListIcon className="h-6 w-6 text-[#fe724c]" />,
       key: 2,
+      pathRegex: new RegExp(/^\/credit-histories/g),
+      onClick: () => {
+        router.push(ROUTES.HISTORY);
+      },
+    },
+    {
+      name: "Nhóm Của Tôi",
+      icon: <RectangleGroupIcon className="h-6 w-6 text-[#fe724c]" />,
+      key: 3,
       pathRegex: new RegExp(/^\/my-orders/g),
       onClick: () => {
         router.push(ROUTES.MY_ORDERS);
       },
     },
     {
-      name: "Cài đặt",
+      name: "Tôi",
       icon: <UserCircleIcon className="h-6 w-6 text-[#fe724c]" />,
       key: 4,
       pathRegex: new RegExp(/^\/my-page+$/g),

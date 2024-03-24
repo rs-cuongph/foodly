@@ -4,7 +4,7 @@ import GroupOrderItem from "@/components/atoms/GroupOrderItem";
 import { Scroller } from "@/components/atoms/Scroller";
 import { useAppDispatch, useAppSelector } from "@/hooks/stores.hook";
 import { useWindowSize } from "@/hooks/window-size";
-import { fetchListRoom } from "@/provider/redux/thunk/room.thunk";
+import { fetchListMyRoom } from "@/provider/redux/thunk/room.thunk";
 import { Room } from "@/provider/redux/types/room";
 import { Spinner } from "@nextui-org/react";
 import { useEffect } from "react";
@@ -27,7 +27,7 @@ const OrderListStyled = styled.div`
   }
 `;
 
-export default function GroupOrderList() {
+export default function MyGroupOrderList() {
   const { isMobile } = useWindowSize();
   const dispatch = useAppDispatch();
   const params = useAppSelector((state) => state.room.searchParams);
@@ -35,7 +35,7 @@ export default function GroupOrderList() {
   const rooms = useAppSelector((state) => state.room.rooms);
 
   useEffect(() => {
-    dispatch(fetchListRoom(params));
+    dispatch(fetchListMyRoom(params));
   }, [params]);
 
   if (loading)

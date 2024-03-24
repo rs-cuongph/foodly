@@ -31,6 +31,7 @@ import { ROUTES } from "@/shared/constants";
 import { useSession } from "next-auth/react";
 import { setOpenModalLogin } from "@/provider/redux/reducer/auth.reducer";
 import { showNotify } from "@/provider/redux/reducer/common.reducer";
+import { Chip } from "@nextui-org/react";
 
 interface OrderItemProps {
   data: Room;
@@ -52,7 +53,7 @@ export default function GroupOrderItem({ data }: OrderItemProps) {
 
   const goToDetail = useCallback(() => {
     router.push(
-      getRoute(ROUTES.MY_ORDER_DETAIL, {
+      getRoute(ROUTES.DETAIL_GROUP_ORDER, {
         id: data.id,
       })
     );
@@ -89,6 +90,19 @@ export default function GroupOrderItem({ data }: OrderItemProps) {
         {formatCurrency(data.price)}
         <span className="unit ml-1">vnđ</span>
       </Money>
+      {time !== 0 && (
+        <Chip
+          color="success"
+          variant="dot"
+          className="absolute top-[10px] right-3"
+          classNames={{
+            base: ["border-[#18c964] bg-white backdrop-blur-sm"],
+            content: ["text-[#18c964]"],
+          }}
+        >
+          đang mở
+        </Chip>
+      )}
       <div className="absolute top-[150px] left-3 flex flex-row gap-2">
         <OrderId className="flex flex-row gap-[2px]">
           <HashtagIcon className="h-4 w-4 text-primary" />
@@ -114,13 +128,13 @@ export default function GroupOrderItem({ data }: OrderItemProps) {
             {data.creator.username}
           </h5>
         </div>
-        {time !== 0 && (
-          <div className="mt-[20px] flex flex-row gap-2">
-            <ButtonWrapper color="primary" onClick={goToDetail}>
-              <InformationCircleIcon className="h-4 w-4 text-white" />
-              Chi Tiết
-            </ButtonWrapper>
+        <div className="mt-[20px] flex flex-row gap-2">
+          <ButtonWrapper color="primary" onClick={goToDetail}>
+            <InformationCircleIcon className="h-4 w-4 text-white" />
+            Chi Tiết
+          </ButtonWrapper>
 
+          {time !== 0 && (
             <ButtonWrapper
               color="primary"
               variant="bordered"
@@ -131,8 +145,8 @@ export default function GroupOrderItem({ data }: OrderItemProps) {
               <ShoppingCartIcon className="h-4 w-4 text-primary" />
               Đặt
             </ButtonWrapper>
-          </div>
-        )}
+          )}
+        </div>
       </div>
       <ModalOrder
         open={isOpenModalOrder}

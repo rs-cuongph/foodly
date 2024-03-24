@@ -1,5 +1,6 @@
 interface Room {
   id: string;
+  room_id: string;
   name: string;
 }
 interface Creator {
@@ -33,6 +34,14 @@ export interface CreateOrderI {
   coupon_code: string | null;
 }
 
+export interface EditOrderI {
+  room_id: string;
+  order_id: string;
+  content: string;
+  quanlity: number;
+  price: number;
+}
+
 export interface ListOrderI {
   room_id: string;
   page: string | number;
@@ -40,6 +49,8 @@ export interface ListOrderI {
   sort_by?: string;
   sort_type?: "DESC" | "ASC";
   keywords?: string;
+  status: string[];
+  search_by?: string | null;
 }
 
 export interface ListOrderResponseI {
@@ -48,4 +59,9 @@ export interface ListOrderResponseI {
     page: number;
     total_record: number;
   };
+}
+
+export interface DeleteOrderI {
+  room_id: string;
+  order_id: string;
 }

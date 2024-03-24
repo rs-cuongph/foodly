@@ -9,6 +9,8 @@ import {
   DetailOrderStyled,
   ImageWrapperStyled,
   InfoHeaderStyled,
+  OrderDate,
+  OrderId,
   OrderListStyled,
 } from "./styled";
 import {
@@ -27,15 +29,13 @@ import {
   DropdownMenu,
   DropdownTrigger,
 } from "@nextui-org/react";
-import { OrderDate } from "@/components/atoms/MyOrderItem/styled";
-import { OrderId } from "@/components/atoms/MyOrderItem/styled";
+
 import { Scroller } from "@/components/atoms/Scroller";
 import { useWindowSize } from "@/hooks/window-size";
 import { useParams, useRouter } from "next/navigation";
-import ModalDeleteOrder from "../../molecules/ModalDeleteOrder";
 import ModalOrder from "../../molecules/ModalOrder";
 import { useAppDispatch, useAppSelector } from "@/hooks/stores.hook";
-import { fetchRoomDetail } from "@/provider/redux/thunk/room.thunk";
+import { deleteRoom, fetchRoomDetail } from "@/provider/redux/thunk/room.thunk";
 import { formatTime, getTimeFromNow } from "@/shared/helpers/format";
 import Spinner from "@/components/atoms/Spinner";
 import { useCopyToClipboard } from "@/hooks/useCopy";
@@ -45,7 +45,11 @@ import { ROUTES } from "@/shared/constants";
 import ModalCreateRoom from "../../molecules/ModalCreateRoom";
 import { setOpenModalCreateRoom } from "@/provider/redux/reducer/room.reducer";
 import OrderTable from "../../molecules/OrderTable";
-import { fetchListOrder } from "@/provider/redux/thunk/order.thunk";
+import {
+  deleteOrder,
+  fetchListOrder,
+} from "@/provider/redux/thunk/order.thunk";
+import ModalDeleteRoom from "@/components/molecules/ModalDelete";
 
 export default function DetailOrder() {
   const router = useRouter();
@@ -53,7 +57,7 @@ export default function DetailOrder() {
   const { id } = useParams();
   const dispatch = useAppDispatch();
   const [_, copy] = useCopyToClipboard();
-  const [isOpenModalDelete, setOpenModalDelete] = useState(false);
+  const [isOpenModalDeleteRoom, setOpenModalDeleteRoom] = useState(false);
   const [isOpenModalOrder, setOpenModalOrder] = useState(false);
   const currentUser = useAppSelector((state) => state.auth.userInfo);
   const { room, isFetchingRoom: isLoading } = useAppSelector(
@@ -95,7 +99,7 @@ export default function DetailOrder() {
             <DropdownItem
               key="remove"
               className="text-danger"
-              onClick={openModalDeleteOrder}
+              onClick={openModalDelete}
               startContent={<TrashIcon className="h-4 w-4 text-red" />}
             >
               Xoá
@@ -116,8 +120,8 @@ export default function DetailOrder() {
     setOpenModalOrder(true);
   }, []);
 
-  const openModalDeleteOrder = useCallback(() => {
-    setOpenModalDelete(true);
+  const openModalDelete = useCallback(() => {
+    setOpenModalDeleteRoom(true);
   }, []);
 
   const handleShare = useCallback(() => {
@@ -125,7 +129,7 @@ export default function DetailOrder() {
       .then(() => {
         dispatch(
           showNotify({
-            messages: "Copy Link Order Successfully",
+            messages: "Sao chép liên kết thành công",
             type: "success",
           })
         );
@@ -140,9 +144,13 @@ export default function DetailOrder() {
       });
   }, [copy, dispatch]);
 
-  const onDeleteSuccess = useCallback(() => {
-    router.replace(ROUTES.HOME);
-  }, []);
+  const onDelete = useCallback(async () => {
+    const res = await dispatch(deleteRoom(room.id));
+    if (res.type === "room/delete/fulfilled") {
+      setOpenModalDeleteRoom(false);
+      router.replace(ROUTES.HOME);
+    }
+  }, [room]);
 
   //useEffect
   useEffect(() => {
@@ -223,15 +231,15 @@ export default function DetailOrder() {
           </InfoHeaderStyled>
         </DetailHeaderStyled>
         <OrderListStyled className="mt-2">
-          <OrderTable roomId={room.id} />
+          <OrderTable data={room} />
         </OrderListStyled>
       </Scroller>
-      <ModalDeleteOrder
-        open={isOpenModalDelete}
-        setOpen={setOpenModalDelete}
-        roomId={room.id}
-        onDeleteSuccess={onDeleteSuccess}
+      <ModalDeleteRoom
+        open={isOpenModalDeleteRoom}
+        setOpen={setOpenModalDeleteRoom}
+        onSubmit={onDelete}
       />
+
       <ModalOrder
         open={isOpenModalOrder}
         setOpen={setOpenModalOrder}

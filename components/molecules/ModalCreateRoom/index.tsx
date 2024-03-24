@@ -141,6 +141,7 @@ export default function ModalCreateRoom({ editData }: CreateRoomProps) {
                 </ModalHeader>
                 <ModalBody>
                   <ControlledInput
+                    label="Tên nhóm"
                     type="text"
                     control={control}
                     formField={"name"}
@@ -148,7 +149,7 @@ export default function ModalCreateRoom({ editData }: CreateRoomProps) {
                   />
                   {!mode && (
                     <ControlledTextarea
-                      label="Description"
+                      label="Thực đơn"
                       control={control}
                       formField={"description"}
                       errorMessage={errors?.description?.message}
@@ -177,7 +178,7 @@ export default function ModalCreateRoom({ editData }: CreateRoomProps) {
                   {!mode && (
                     <ControlledInput
                       type="text"
-                      label={"Price"}
+                      label={"Giá"}
                       labelPlacement="inside"
                       className="w-[200px]"
                       control={control}
@@ -216,7 +217,7 @@ export default function ModalCreateRoom({ editData }: CreateRoomProps) {
                       Limit
                     </Radio>
                   </RadioGroup> */}
-                  {getValues("share_scope") === SHARE_SCOPE.LIMIT && (
+                  {/* {getValues("share_scope") === SHARE_SCOPE.LIMIT && (
                     <Select
                       label="Invite User"
                       selectionMode="multiple"
@@ -228,7 +229,7 @@ export default function ModalCreateRoom({ editData }: CreateRoomProps) {
                         </SelectItem>
                       ))}
                     </Select>
-                  )}
+                  )} */}
                 </ModalBody>
                 <ModalFooter>
                   <Button color="danger" variant="light" onPress={onClose}>

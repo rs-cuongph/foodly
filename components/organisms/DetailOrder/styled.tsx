@@ -50,3 +50,33 @@ export const OrderListStyled = styled.div`
 export const OrderItemStyled = styled.div`
   background: white;
 `;
+
+export const OrderId = styled.div`
+  width: fit-content;
+  border-radius: 5px;
+  color: #fff;
+  box-shadow: 2px 1px 5px 0px rgba(211, 209, 216, 1);
+  padding: 5px 10px;
+  min-width: 50px;
+  min-height: 25px;
+
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+`;
+
+export const OrderDate = styled.div`
+  width: fit-content;
+  border-radius: 5px;
+  color: #fff;
+  box-shadow: 2px 1px 5px 0px rgba(211, 209, 216, 1);
+  padding: 5px 10px;
+  min-width: 50px;
+  min-height: 25px;
+
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+`;

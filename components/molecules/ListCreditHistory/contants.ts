@@ -1,13 +1,14 @@
 import { ChipProps } from "@nextui-org/react";
 
 const columns = [
-  { name: "ID", uid: "id", sortable: true },
-  { name: "Người đặt", uid: "creator", sortable: true },
+  { name: "Ngày", uid: "created_at", sortable: true, width: "110px" },
+  { name: "ID Nhóm", uid: "room_id", sortable: true },
+  { name: "Tên Nhóm", uid: "room_name" },
+  { name: "Người đặt", uid: "creator" },
   { name: "Món", uid: "content" },
-  { name: "Giá", uid: "price" },
+  { name: "Giá", uid: "price", minWidth: "110px" },
   { name: "Số lượng", uid: "quanlity" },
-  { name: "Tổng Tiền", uid: "amount" },
-  { name: "Ghi chú", uid: "notes" },
+  { name: "Tổng Tiền", uid: "amount", minWidth: "110px" },
   { name: "Trạng thái", uid: "status", sortable: true },
   { name: "Phương thức TT", uid: "payment_method" },
   { name: "Hành động", uid: "actions" },
@@ -24,12 +25,6 @@ const statusColorMap: Record<string, ChipProps["color"]> = {
 };
 
 const statusOptions = [
-  { name: "TT Thành Công", uid: "paid" },
-  { name: "Đã Huỷ", uid: "cancelled" },
-  { name: "Đang Hoàn Tiền", uid: "refunding" },
-  { name: "Đã Hoàn Tiền", uid: "refunded" },
-  { name: "Đang Xem Xét", uid: "reviewing" },
-  { name: "Tạm Hoãn", uid: "pending" },
   {
     name: "Đã Thanh Toán",
     uid: "processing",
@@ -37,13 +32,30 @@ const statusOptions = [
   },
 ];
 
+const searchByOptions = [
+  {
+    name: "Nhóm",
+    uid: "room",
+  },
+  {
+    name: "Người đặt",
+    uid: "order",
+  },
+];
+
 const INITIAL_VISIBLE_COLUMNS = [
+  "room_id",
   "creator",
   "content",
-  "quanlity",
-  "price",
+  "amount",
   "status",
   "actions",
 ];
 
-export { statusColorMap, statusOptions, INITIAL_VISIBLE_COLUMNS, columns };
+export {
+  statusColorMap,
+  statusOptions,
+  searchByOptions,
+  INITIAL_VISIBLE_COLUMNS,
+  columns,
+};
