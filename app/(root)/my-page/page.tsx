@@ -1,3 +1,13 @@
+import MyDebtHistory from "@/components/molecules/MyDebtHistory";
+import PaymentSetting from "@/components/molecules/PaymentSetting";
+import UserInformation from "@/components/molecules/UserInformation";
+
 export default function MyPage() {
-  return <div className="bg-white p-[15px] rounded-[10px]">sss</div>;
+  return (
+    <div className="flex gap-2 flex-col">
+      <UserInformation />
+      <PaymentSetting />
+      <MyDebtHistory />
+    </div>
+  );
 }

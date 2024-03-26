@@ -27,7 +27,7 @@ export default function Sidebar() {
   const handleLoginLogout = useCallback(() => {
     if (session.status === "authenticated") {
       signOut({
-        redirect: false,
+        redirect: true,
       });
     } else {
       dispatch(setOpenModalLogin(true));
@@ -40,6 +40,7 @@ export default function Sidebar() {
       icon: <HomeIcon className="h-6 w-6 text-[#fe724c]" />,
       key: 1,
       pathRegex: new RegExp(/^\/home+$/g),
+      authenticate: false,
       onClick: () => {
         router.push(ROUTES.HOME);
       },
@@ -49,6 +50,7 @@ export default function Sidebar() {
       icon: <ClipboardDocumentListIcon className="h-6 w-6 text-[#fe724c]" />,
       key: 2,
       pathRegex: new RegExp(/^\/credit-histories/g),
+      authenticate: true,
       onClick: () => {
         router.push(ROUTES.HISTORY);
       },
@@ -58,6 +60,7 @@ export default function Sidebar() {
       icon: <RectangleGroupIcon className="h-6 w-6 text-[#fe724c]" />,
       key: 3,
       pathRegex: new RegExp(/^\/my-orders/g),
+      authenticate: true,
       onClick: () => {
         router.push(ROUTES.MY_ORDERS);
       },
@@ -67,11 +70,18 @@ export default function Sidebar() {
       icon: <UserCircleIcon className="h-6 w-6 text-[#fe724c]" />,
       key: 4,
       pathRegex: new RegExp(/^\/my-page+$/g),
+      authenticate: true,
       onClick: () => {
         router.push(ROUTES.MY_PAGE);
       },
     },
   ];
+
+  const itemsFilter = useMemo(() => {
+    if (session.status === "loading") return [];
+    if (session.status === "authenticated") return items;
+    return items.filter((i) => i.authenticate === false);
+  }, [session]);
 
   const checkIsActive = useCallback(
     (pathRegex: RegExp) => {
@@ -86,7 +96,7 @@ export default function Sidebar() {
   return (
     <SidebarStyled className="shadow-2xl shadow-blue-500/20 backdrop-blur-sm">
       <MenuWrapper className="relative flex gap-1">
-        {items.map((item) => {
+        {itemsFilter.map((item) => {
           return (
             <MenuItem
               key={item.key}

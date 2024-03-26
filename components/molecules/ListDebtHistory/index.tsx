@@ -7,6 +7,7 @@ import {
   statusOptions,
 } from "./contants";
 import {
+  CheckCircleIcon,
   ChevronDownIcon,
   HashtagIcon,
   MagnifyingGlassIcon,
@@ -40,12 +41,23 @@ import {
   setSearchQuery,
 } from "@/provider/redux/reducer/order.reducer";
 import { useAppDispatch, useAppSelector } from "@/hooks/stores.hook";
-import { fetchListDebt } from "@/provider/redux/thunk/order.thunk";
+import {
+  acceptOrder,
+  deleteOrder,
+  fetchListDebt,
+} from "@/provider/redux/thunk/order.thunk";
 import { Order } from "@/provider/redux/types/order";
 import { formatCurrency } from "@/shared/helpers/currency";
 import { PAGINATION_PARAMS } from "@/shared/constants";
 import { formatTime } from "@/shared/helpers/format";
 import { OrderId } from "./styled";
+import ModalConfirm from "../ModalConfirm";
+import ModalDeleteOrder from "@/components/molecules/ModalDelete";
+import {
+  hideLoading,
+  showLoading,
+  showNotify,
+} from "@/provider/redux/reducer/common.reducer";
 
 const classNames = {
   wrapper: ["max-h-[400px]"],
@@ -62,7 +74,7 @@ const classNames = {
     "group-data-[last=true]:last:before:rounded-none",
   ],
 };
-export default function ListCreditHistory() {
+export default function ListDebtHistory() {
   const dispatch = useAppDispatch();
   const searchQuery = useAppSelector((state) => state.order.searchQuery);
   const loading = useAppSelector((state) => state.common.loading);
@@ -77,21 +89,23 @@ export default function ListCreditHistory() {
     direction: "descending",
   });
   const [searchByKey, setSearchByKey] = useState(new Set(["room"]));
-
+  const [isOpenModalConfirm, setOpenModalConfirm] = useState(false);
+  const [isOpenModalDeleteOrder, setOpenModalDeleteOrder] = useState(false);
+  const [order, setOrder] = useState<Order | undefined>(undefined);
   const searchByValue = useMemo(() => {
     return searchByOptions.find((i) => Array.from(searchByKey).includes(i.uid))
       ?.name;
   }, [searchByKey]);
 
-  const handleOpenModalEdit = useCallback((order: Order) => {
-    // setOrder(order);
-    // setOpenModalOrder(true);
+  const handleOpenModalConfirm = useCallback((order: Order) => {
+    setOrder(order);
+    setOpenModalConfirm(true);
   }, []);
 
   const handleOpenModalDelete = useCallback((order: Order) => {
     if (order.status !== "processing") return;
-    // setOrder(order);
-    // setOpenModalDeleteOrder(true);
+    setOrder(order);
+    setOpenModalDeleteOrder(true);
   }, []);
 
   const headerColumns = useMemo(() => {
@@ -99,6 +113,44 @@ export default function ListCreditHistory() {
       Array.from(visibleColumns).includes(column.uid)
     );
   }, [visibleColumns]);
+
+  const onDeleteOrder = async () => {
+    if (!order) return;
+    dispatch(showLoading());
+    const res = await dispatch(
+      deleteOrder({ room_id: order.room.id, order_id: order.id })
+    );
+    dispatch(hideLoading());
+    if (res.type === "order/delete/fulfilled") {
+      dispatch(
+        showNotify({
+          messages: "Xoá thành công",
+          type: "error",
+        })
+      );
+      dispatch(fetchListDebt(searchQuery));
+      setOpenModalDeleteOrder(false);
+    }
+  };
+
+  const onAcceptPayment = async () => {
+    if (!order) return;
+    dispatch(showLoading());
+    const res = await dispatch(
+      acceptOrder({ room_id: order.room.id, order_id: order.id })
+    );
+    dispatch(hideLoading());
+    if (res.type === "order/accept/fulfilled") {
+      dispatch(
+        showNotify({
+          messages: "Cập nhật trạng thái thanh toán thành công",
+          type: "error",
+        })
+      );
+      dispatch(fetchListDebt(searchQuery));
+      setOpenModalConfirm(false);
+    }
+  };
 
   const totalPage = useMemo(() => {
     return Math.ceil(
@@ -166,13 +218,21 @@ export default function ListCreditHistory() {
       case "actions":
         return (
           <div className="relative flex justify-center items-center gap-2">
-            <Button
+            {/* <Button
               onClick={() => handleOpenModalEdit(order)}
               color="primary"
               variant={"light"}
               isIconOnly
             >
               <PencilSquareIcon className="h-5 w-5 text-[#fe724c]" />
+            </Button> */}
+            <Button
+              onClick={() => handleOpenModalConfirm(order)}
+              color="success"
+              variant={"light"}
+              isIconOnly
+            >
+              <CheckCircleIcon className="h-5 w-5 text-success" />
             </Button>
 
             <Button
@@ -282,7 +342,7 @@ export default function ListCreditHistory() {
         </div>
       </div>
     );
-  }, [searchByKey, visibleColumns]);
+  }, [searchByKey, visibleColumns, debtList.pagination.total_record]);
 
   const bottomContent = useMemo(() => {
     return (
@@ -365,6 +425,16 @@ export default function ListCreditHistory() {
           )}
         </TableBody>
       </Table>
+      <ModalDeleteOrder
+        open={isOpenModalDeleteOrder}
+        setOpen={setOpenModalDeleteOrder}
+        onSubmit={onDeleteOrder}
+      />
+      <ModalConfirm
+        open={isOpenModalConfirm}
+        setOpen={setOpenModalConfirm}
+        onSubmit={() => onAcceptPayment()}
+      />
     </div>
   );
 }

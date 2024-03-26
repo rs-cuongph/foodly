@@ -2,6 +2,7 @@ import { request } from "@/shared/axios";
 import { getRoute } from "@/shared/helpers/route";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
+  AcceptOrderI,
   CreateOrderI,
   DeleteOrderI,
   EditOrderI,
@@ -94,6 +95,28 @@ export const deleteOrder = createAsyncThunk<void, DeleteOrderI>(
         order_id: data.order_id,
       }),
       method: "DELETE",
+    });
+  },
+  {
+    serializeError: (error: any) => {
+      return {
+        code: error?.errorCode,
+        message: error?.message,
+      };
+    },
+  }
+);
+
+export const acceptOrder = createAsyncThunk<void, AcceptOrderI>(
+  "order/accept",
+  async (data) => {
+    return request({
+      url: getRoute("rooms/:room_id/orders/:order_id/update-status/:status", {
+        room_id: data.room_id,
+        order_id: data.order_id,
+        status: "paid",
+      }),
+      method: "PATCH",
     });
   },
   {

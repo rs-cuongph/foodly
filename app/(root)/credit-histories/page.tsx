@@ -1,10 +1,10 @@
 "use client";
-import ListCreditHistory from "@/components/molecules/ListCreditHistory";
+import ListDebtHistory from "@/components/molecules/ListDebtHistory";
 
 export default function MyOrdersPage() {
   return (
     <>
-      <ListCreditHistory />
+      <ListDebtHistory />
     </>
   );
 }

@@ -46,6 +46,10 @@ import { setSearchQuery } from "@/provider/redux/reducer/order.reducer";
 import ModalOrder from "../ModalOrder";
 import { Room } from "@/provider/redux/types/room";
 import { useSession } from "next-auth/react";
+import {
+  hideLoading,
+  showLoading,
+} from "@/provider/redux/reducer/common.reducer";
 
 interface OrderTableProps {
   data: Room;
@@ -168,9 +172,12 @@ export default function OrderTable({ data }: OrderTableProps) {
 
   const onDeleteOrder = async () => {
     if (!order) return;
+
+    dispatch(showLoading());
     const res = await dispatch(
       deleteOrder({ room_id: data.id, order_id: order.id })
     );
+    dispatch(hideLoading());
 
     if (res.type === "order/delete/fulfilled") {
       dispatch(fetchListOrder(searchQuery));

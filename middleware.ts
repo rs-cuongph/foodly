@@ -1,13 +1,13 @@
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
-  //   const session = request.cookies.get(STORAGE_KEYS.ACCESS_TOKEN)?.value;
-  //   if (!session && !request.nextUrl.pathname.startsWith("/auth/")) {
-  //     return Response.redirect(new URL("/auth/login", request.url));
-  //   }
-  //   if (session && request.nextUrl.pathname === "/") {
-  //     return Response.redirect(new URL("/search", request.url));
-  //   }
+  const session = request.cookies.get("authjs.session-token")?.value;
+  if (!session && !request.nextUrl.pathname.startsWith("/home")) {
+    return Response.redirect(new URL("/home", request.url));
+  }
+  if (session && request.nextUrl.pathname === "/") {
+    return Response.redirect(new URL("/home", request.url));
+  }
 }
 
 export const config = {

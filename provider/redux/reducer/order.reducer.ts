@@ -1,5 +1,6 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import {
+  acceptOrder,
   createOrder,
   deleteOrder,
   fetchListDebt,
@@ -75,6 +76,7 @@ const orderSlice = createSlice({
         state.loadingCreate = false;
         state.error = action.error.message;
       });
+
     builder
       .addCase(deleteOrder.pending, (state) => {
         state.loadingDelete = true;
@@ -86,6 +88,7 @@ const orderSlice = createSlice({
         state.loadingDelete = false;
         state.error = action.error.message;
       });
+
     builder.addCase(fetchListOrder.pending, (state) => {
       state.loadingList = true;
     });

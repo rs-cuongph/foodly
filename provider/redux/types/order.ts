@@ -65,3 +65,8 @@ export interface DeleteOrderI {
   room_id: string;
   order_id: string;
 }
+
+export interface AcceptOrderI {
+  room_id: string;
+  order_id: string;
+}

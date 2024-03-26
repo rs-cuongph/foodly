@@ -3,7 +3,7 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import { delay } from "lodash";
 import { v4 as uuidv4 } from "uuid";
 import { signUp } from "../thunk/auth.thunk";
-import { deleteOrder, editOrder } from "../thunk/order.thunk";
+import { acceptOrder, deleteOrder, editOrder } from "../thunk/order.thunk";
 
 interface NotifyState {
   type: "error" | "success" | "warning";
@@ -72,6 +72,15 @@ const commonSlice = createSlice({
       });
     });
     builder.addCase(editOrder.rejected, (state, action) => {
+      const _id = uuidv4();
+      state.notify.push({
+        messages: "Đã xảy ra lỗi !!!",
+        type: "error",
+        duration: 2000,
+        id: _id,
+      });
+    });
+    builder.addCase(acceptOrder.rejected, (state, action) => {
       const _id = uuidv4();
       state.notify.push({
         messages: "Đã xảy ra lỗi !!!",
