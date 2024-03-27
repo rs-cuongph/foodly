@@ -35,6 +35,14 @@ const authSlice = createSlice({
         });
       }
     },
+    setPaymentSetting(
+      state,
+      payload: PayloadAction<UserInfo["info"]["payment_setting"]>
+    ) {
+      if (state.userInfo) {
+        state.userInfo.payment_setting = payload.payload;
+      }
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(signIn.pending, (state, action) => {
@@ -65,5 +73,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { setOpenModalLogin, logout } = authSlice.actions;
+export const { setOpenModalLogin, logout, setPaymentSetting } =
+  authSlice.actions;
 export default authSlice;

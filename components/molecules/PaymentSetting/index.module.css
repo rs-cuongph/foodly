@@ -17,3 +17,9 @@
 .payment-setting__row .value {
   font-size: 0.875rem;  
 }
+
+.logo {
+  width: 50px;
+  object-fit: contain;
+  aspect-ratio: 2;
+}

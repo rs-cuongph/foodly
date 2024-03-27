@@ -1,4 +1,5 @@
-import { Input } from "@nextui-org/react";
+import { Input, SlotsToClasses } from "@nextui-org/react";
+import { FocusEventHandler, ReactNode, FocusEvent } from "react";
 import {
   Control,
   Controller,
@@ -15,7 +16,25 @@ interface InputProps {
   placeholder?: string;
   className?: string;
   labelPlacement?: "inside" | "outside" | "outside-left";
+  size?: "sm" | "md" | "lg";
+  classNames?:
+    | SlotsToClasses<
+        | "description"
+        | "base"
+        | "input"
+        | "label"
+        | "errorMessage"
+        | "mainWrapper"
+        | "inputWrapper"
+        | "innerWrapper"
+        | "clearButton"
+        | "helperWrapper"
+      >
+    | undefined;
   onChange?: (value: string) => void;
+  disabled?: boolean;
+  endContent?: ReactNode;
+  onBlur?: (e: FocusEvent<Element>) => void;
 }
 interface OwnProps<Type extends FieldValues> extends Omit<InputProps, "value"> {
   control: Control<FieldValue<Type>>;
@@ -32,6 +51,7 @@ export default function ControlledInput<T extends FieldValues>({
       name={formField}
       render={({ field }) => (
         <Input
+          size={props?.size}
           type={props?.type || "text"}
           label={props?.label}
           labelPlacement={props?.labelPlacement || "inside"}
@@ -40,11 +60,15 @@ export default function ControlledInput<T extends FieldValues>({
           errorMessage={props?.errorMessage}
           maxLength={props?.maxLength}
           className={props?.className}
+          classNames={props?.classNames}
+          endContent={props.endContent}
           {...field}
+          isDisabled={props?.disabled}
           onValueChange={(value) => {
             field.onChange(value);
             props?.onChange?.(value);
           }}
+          onBlur={props.onBlur}
         />
       )}
     />

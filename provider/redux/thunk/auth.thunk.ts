@@ -1,5 +1,10 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { FormSignIn, FormSignUp, UserInfo } from "../types/auth";
+import {
+  FormSignIn,
+  FormSignUp,
+  FormUpdateUser,
+  UserInfo,
+} from "../types/auth";
 import { request } from "@/shared/axios";
 import { getRoute } from "@/shared/helpers/route";
 
@@ -39,6 +44,17 @@ export const getCurrentUser = createAsyncThunk<UserInfo>(
     return request({
       url: getRoute("auth/user-info"),
       method: "GET",
+    });
+  }
+);
+
+export const updateUser = createAsyncThunk<UserInfo, FormUpdateUser>(
+  "auth/update-user-info",
+  async (data) => {
+    return request({
+      url: getRoute("auth/user-info"),
+      method: "PATCH",
+      data,
     });
   }
 );

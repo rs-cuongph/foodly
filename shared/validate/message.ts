@@ -1,19 +1,27 @@
 export const LABEL = {
   loginForm: {
     email: "email",
-    password: "password",
-    re_password: "re-password",
-    first_name: "first name",
-    last_name: "last name",
+    password: "mật khẩu",
+    re_password: "xác nhận mật khẩu",
+    first_name: "họ",
+    last_name: "tên",
   },
   room: {
-    name: "name",
-    description: "description",
-    public_time_start: "public time start",
-    public_time_end: "public time end",
-    price: "price",
-    share_scope: "share scope",
-    invited_people: "invited people",
+    name: "tên",
+    description: "mô tả",
+    public_time_start: "thời gian bắt đầu",
+    public_time_end: "thời gian kết thúc",
+    price: "giá",
+    share_scope: "phạm vi",
+    invited_people: "lời mời",
+  },
+  add_payment_setting: {
+    method: "phương thức",
+    account_name: "Tên",
+    account_number: "Số thẻ",
+  },
+  edit_basic_info: {
+    username: "tên người dùng",
   },
 };
 
