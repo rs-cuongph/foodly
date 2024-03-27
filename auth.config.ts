@@ -10,8 +10,10 @@ export const authConfig = {
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
+      console.log("=====>>> ", auth?.user);
       const isOnHome = nextUrl.pathname.startsWith("/home");
-      if (!isLoggedIn) return false;
+      if (!isLoggedIn && !isOnHome)
+        return Response.redirect(new URL("/home", nextUrl));
       return true;
     },
     async session({
