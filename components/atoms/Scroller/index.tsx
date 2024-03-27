@@ -152,11 +152,11 @@ export const Scroller = ({
             paddingRight: rest?.paddingRight,
           }}
         >
-          <ScrollSpinner visible="true" hasLoadMore={hasStartLoadMore}>
+          <ScrollSpinner visible={true} hasLoadMore={hasStartLoadMore}>
             <Spinner></Spinner>
           </ScrollSpinner>
           <div ref={childrenRef}>{children}</div>
-          <ScrollSpinner visible="true" hasLoadMore={hasLoadMore}>
+          <ScrollSpinner visible={true} hasLoadMore={hasLoadMore}>
             <Spinner></Spinner>
           </ScrollSpinner>
         </div>
