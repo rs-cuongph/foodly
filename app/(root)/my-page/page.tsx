@@ -1,13 +1,5 @@
-import MyDebtHistory from "@/components/molecules/MyDebtHistory";
-import PaymentSetting from "@/components/molecules/PaymentSetting";
-import UserInformation from "@/components/molecules/UserInformation";
+import MyPageOrg from "@/components/organisms/MyPage";
 
 export default function MyPage() {
-  return (
-    <div className="flex gap-2 flex-col">
-      <UserInformation />
-      <PaymentSetting />
-      <MyDebtHistory />
-    </div>
-  );
+  return <MyPageOrg />;
 }

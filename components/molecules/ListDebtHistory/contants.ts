@@ -25,6 +25,7 @@ const statusColorMap: Record<string, ChipProps["color"]> = {
 };
 
 const statusOptions = [
+  { name: "Chưa Thanh Toán", uid: "init" },
   { name: "TT Thành Công", uid: "paid" },
   { name: "Đã Huỷ", uid: "cancelled" },
   { name: "Đang Hoàn Tiền", uid: "refunding" },

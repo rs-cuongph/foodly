@@ -14,6 +14,17 @@ type FormCreateRoomType = {
   invited_people: [] | string[];
 };
 
+type FormEditRoomType = {
+  id: string;
+  name: string;
+  description?: string | null;
+  public_time_start?: string;
+  public_time_end?: string;
+  price?: number;
+  share_scope: SHARE_SCOPE;
+  invited_people: [] | string[];
+};
+
 const useCreateRoomForm = () => {
   const validationScheme = useMemo(
     () =>
@@ -57,4 +68,4 @@ const useCreateRoomForm = () => {
 };
 
 export { useCreateRoomForm };
-export type { FormCreateRoomType };
+export type { FormCreateRoomType, FormEditRoomType };

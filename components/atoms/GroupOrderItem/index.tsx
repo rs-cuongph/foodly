@@ -24,13 +24,16 @@ import { useAppDispatch } from "@/hooks/stores.hook";
 import { InformationCircleIcon } from "@heroicons/react/24/solid";
 import { getTimeFromNow } from "@/shared/helpers/format";
 import { useCallback, useEffect, useState } from "react";
-import ModalOrder from "@/components/molecules/ModalOrder";
 import { useRouter } from "next/navigation";
 import { getRoute } from "@/shared/helpers/route";
 import { ROUTES } from "@/shared/constants";
 import { useSession } from "next-auth/react";
 import { setOpenModalLogin } from "@/provider/redux/reducer/auth.reducer";
-import { showNotify } from "@/provider/redux/reducer/common.reducer";
+import {
+  setOpenModalOrder,
+  setRoomIForModalOrder,
+  showNotify,
+} from "@/provider/redux/reducer/common.reducer";
 import { Chip } from "@nextui-org/react";
 
 interface OrderItemProps {
@@ -39,7 +42,6 @@ interface OrderItemProps {
 
 export default function GroupOrderItem({ data }: OrderItemProps) {
   const [time, setTime] = useState(getTimeFromNow(data.public_time_end));
-  const [isOpenModalOrder, setOpenModalOrder] = useState(false);
   const dispatch = useAppDispatch();
   const session = useSession();
   const router = useRouter();
@@ -59,23 +61,21 @@ export default function GroupOrderItem({ data }: OrderItemProps) {
     );
   }, [data.id]);
 
-  const beforeAction = useCallback(
-    (action: () => void) => {
-      if (session.status === "authenticated") {
-        action();
-      } else {
-        dispatch(
-          showNotify({
-            messages: "vui lòng đăng nhập trước",
-            type: "warning",
-            duration: 2000,
-          })
-        );
-        dispatch(setOpenModalLogin(true));
-      }
-    },
-    [session]
-  );
+  const handleOrder = useCallback(() => {
+    if (session.status === "authenticated") {
+      dispatch(setOpenModalOrder(true));
+      dispatch(setRoomIForModalOrder(data));
+    } else {
+      dispatch(
+        showNotify({
+          messages: "vui lòng đăng nhập trước",
+          type: "warning",
+          duration: 2000,
+        })
+      );
+      dispatch(setOpenModalLogin(true));
+    }
+  }, [session, data]);
 
   return (
     <CardWrapper className="relative">
@@ -138,9 +138,7 @@ export default function GroupOrderItem({ data }: OrderItemProps) {
             <ButtonWrapper
               color="primary"
               variant="bordered"
-              onClick={() => {
-                beforeAction(() => setOpenModalOrder(true));
-              }}
+              onClick={handleOrder}
             >
               <ShoppingCartIcon className="h-4 w-4 text-primary" />
               Đặt
@@ -148,11 +146,6 @@ export default function GroupOrderItem({ data }: OrderItemProps) {
           )}
         </div>
       </div>
-      <ModalOrder
-        open={isOpenModalOrder}
-        setOpen={setOpenModalOrder}
-        data={data}
-      />
     </CardWrapper>
   );
 }

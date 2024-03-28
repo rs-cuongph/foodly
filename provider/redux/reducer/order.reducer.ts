@@ -1,9 +1,10 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import {
-  acceptOrder,
+  AdminGroupAcceptOrder,
   createOrder,
   deleteOrder,
   fetchListDebt,
+  fetchListMyOrder,
   fetchListOrder,
 } from "../thunk/order.thunk";
 import { ListOrderI, ListOrderResponseI } from "../types/order";
@@ -107,6 +108,24 @@ const orderSlice = createSlice({
       state.loadingList = false;
     });
     builder.addCase(fetchListDebt.fulfilled, (state, action) => {
+      state.loadingList = false;
+      state.orders = {
+        ...action.payload,
+        data: action.payload.data.map((i) => ({
+          ...i,
+          room_name: i.room.name,
+          room_id: i.room.room_id,
+        })),
+      };
+    });
+
+    builder.addCase(fetchListMyOrder.pending, (state) => {
+      state.loadingList = true;
+    });
+    builder.addCase(fetchListMyOrder.rejected, (state) => {
+      state.loadingList = false;
+    });
+    builder.addCase(fetchListMyOrder.fulfilled, (state, action) => {
       state.loadingList = false;
       state.orders = {
         ...action.payload,

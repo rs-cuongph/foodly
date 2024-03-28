@@ -39,16 +39,16 @@ import { deleteRoom, fetchRoomDetail } from "@/provider/redux/thunk/room.thunk";
 import { formatTime, getTimeFromNow } from "@/shared/helpers/format";
 import Spinner from "@/components/atoms/Spinner";
 import { useCopyToClipboard } from "@/hooks/useCopy";
-import { showNotify } from "@/provider/redux/reducer/common.reducer";
+import {
+  setOpenModalOrder,
+  setRoomIForModalOrder,
+  showNotify,
+} from "@/provider/redux/reducer/common.reducer";
 import { RemainingTime } from "@/components/atoms/GroupOrderItem/styled";
 import { ROUTES } from "@/shared/constants";
 import ModalCreateRoom from "../../molecules/ModalCreateRoom";
 import { setOpenModalCreateRoom } from "@/provider/redux/reducer/room.reducer";
 import OrderTable from "../../molecules/OrderTable";
-import {
-  deleteOrder,
-  fetchListOrder,
-} from "@/provider/redux/thunk/order.thunk";
 import ModalDeleteRoom from "@/components/molecules/ModalDelete";
 
 export default function DetailOrder() {
@@ -58,16 +58,14 @@ export default function DetailOrder() {
   const dispatch = useAppDispatch();
   const [_, copy] = useCopyToClipboard();
   const [isOpenModalDeleteRoom, setOpenModalDeleteRoom] = useState(false);
-  const [isOpenModalOrder, setOpenModalOrder] = useState(false);
   const currentUser = useAppSelector((state) => state.auth.userInfo);
   const { room, isFetchingRoom: isLoading } = useAppSelector(
     (state) => state.room
   );
 
-  const isCreator = useMemo(
-    () => room.creator.id === currentUser?.id,
-    [currentUser, room]
-  );
+  const isCreator = useMemo(() => {
+    return room.creator.id === currentUser?.id;
+  }, [currentUser, room]);
   const [time, setTime] = useState<string | number>(0);
 
   const renderMoreItem = useCallback(() => {
@@ -117,8 +115,9 @@ export default function DetailOrder() {
   }, [id]);
 
   const openModalOrder = useCallback(() => {
-    setOpenModalOrder(true);
-  }, []);
+    dispatch(setOpenModalOrder(true));
+    dispatch(setRoomIForModalOrder(room));
+  }, [room]);
 
   const openModalDelete = useCallback(() => {
     setOpenModalDeleteRoom(true);
@@ -195,7 +194,7 @@ export default function DetailOrder() {
                 <div className="flex gap-2 mb-2">
                   <OrderDate className="bg-gray-600 flex flex-row gap-1">
                     {room.created_at &&
-                      formatTime(room.created_at, "YYYY-MM-DD HH:mm")}
+                      formatTime(room.created_at, "DD-MM-YYYY HH:mm")}
                   </OrderDate>
                   <OrderId className="bg-primary flex flex-row gap-0">
                     <HashtagIcon className="h-4 w-4 text-white" />
@@ -234,17 +233,14 @@ export default function DetailOrder() {
           <OrderTable data={room} />
         </OrderListStyled>
       </Scroller>
+
       <ModalDeleteRoom
         open={isOpenModalDeleteRoom}
         setOpen={setOpenModalDeleteRoom}
         onSubmit={onDelete}
       />
 
-      <ModalOrder
-        open={isOpenModalOrder}
-        setOpen={setOpenModalOrder}
-        data={room}
-      />
+      <ModalOrder />
       <ModalCreateRoom editData={room} />
     </DetailOrderStyled>
   );

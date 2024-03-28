@@ -1,4 +1,7 @@
-import { FormCreateRoomType } from "@/components/molecules/ModalCreateRoom/validate";
+import {
+  FormCreateRoomType,
+  FormEditRoomType,
+} from "@/components/molecules/ModalCreateRoom/validate";
 import { request } from "@/shared/axios";
 import { getRoute } from "@/shared/helpers/route";
 import { createAsyncThunk } from "@reduxjs/toolkit";
@@ -17,6 +20,17 @@ export const createRoom = createAsyncThunk<void, FormCreateRoomType>(
     return request({
       url: getRoute(`rooms`),
       method: "POST",
+      data,
+    });
+  }
+);
+
+export const editRoom = createAsyncThunk<void, FormEditRoomType>(
+  "rooms/edit",
+  async (data) => {
+    return request({
+      url: getRoute(`rooms/:id`, { id: data.id }),
+      method: "PATCH",
       data,
     });
   }

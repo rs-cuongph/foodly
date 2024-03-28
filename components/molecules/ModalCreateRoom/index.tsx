@@ -28,6 +28,7 @@ import {
 } from "@/provider/redux/reducer/common.reducer";
 import {
   createRoom,
+  editRoom,
   fetchListRoom,
   fetchListUser,
 } from "@/provider/redux/thunk/room.thunk";
@@ -60,21 +61,39 @@ export default function ModalCreateRoom({ editData }: CreateRoomProps) {
   const onSubmit = async (values: FormCreateRoomType) => {
     dispatch(showLoading());
     const action = await dispatch(
-      createRoom({
-        name: values.name,
-        description: values.description,
-        price: values.price,
-        public_time_start: values.public_time_start
-          ? dayjs(values.public_time_start).toISOString()
-          : undefined,
-        public_time_end: values.public_time_end
-          ? dayjs(values.public_time_end).toISOString()
-          : undefined,
-        invited_people: values.invited_people,
-        share_scope: values.share_scope,
-      })
+      editData
+        ? editRoom({
+            id: editData.id,
+            name: values.name,
+            description: values.description,
+            price: values.price,
+            public_time_start: values.public_time_start
+              ? dayjs(values.public_time_start).toISOString()
+              : undefined,
+            public_time_end: values.public_time_end
+              ? dayjs(values.public_time_end).toISOString()
+              : undefined,
+            invited_people: values.invited_people,
+            share_scope: values.share_scope,
+          })
+        : createRoom({
+            name: values.name,
+            description: values.description,
+            price: values.price,
+            public_time_start: values.public_time_start
+              ? dayjs(values.public_time_start).toISOString()
+              : undefined,
+            public_time_end: values.public_time_end
+              ? dayjs(values.public_time_end).toISOString()
+              : undefined,
+            invited_people: values.invited_people,
+            share_scope: values.share_scope,
+          })
     );
-    if (action.type === "rooms/create/rejected") {
+    if (
+      action.type === "rooms/create/rejected" ||
+      action.type === "rooms/edit/rejected"
+    ) {
       //
     } else {
       onClose();
@@ -86,7 +105,7 @@ export default function ModalCreateRoom({ editData }: CreateRoomProps) {
         ),
         dispatch(
           showNotify({
-            messages: "Tạo thành công",
+            messages: editData ? "Sửa thành công" : "Tạo thành công",
             type: "success",
           })
         ),
@@ -137,7 +156,7 @@ export default function ModalCreateRoom({ editData }: CreateRoomProps) {
             <>
               <form onSubmit={form.handleSubmit(onSubmit)} className={""}>
                 <ModalHeader className="flex flex-col gap-1 text-center">
-                  <div>{editData ? "CHỈNH SỬA" : "TẠO MỚI"} </div>
+                  <div>{editData ? "Chỉnh Sửa" : "Tạo Mới"} </div>
                 </ModalHeader>
                 <ModalBody>
                   <ControlledInput

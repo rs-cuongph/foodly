@@ -9,6 +9,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import {
   createRoom,
+  editRoom,
   fetchListMyRoom,
   fetchListRoom,
   fetchListUser,
@@ -140,6 +141,18 @@ const roomSlice = createSlice({
         state.isCreating = false;
       })
       .addCase(createRoom.rejected, (state, action) => {
+        state.isCreating = false;
+        state.error = action.error.message;
+      });
+
+    builder
+      .addCase(editRoom.pending, (state) => {
+        state.isCreating = true;
+      })
+      .addCase(editRoom.fulfilled, (state, action) => {
+        state.isCreating = false;
+      })
+      .addCase(editRoom.rejected, (state, action) => {
         state.isCreating = false;
         state.error = action.error.message;
       });

@@ -42,7 +42,7 @@ import {
 } from "@/provider/redux/reducer/order.reducer";
 import { useAppDispatch, useAppSelector } from "@/hooks/stores.hook";
 import {
-  acceptOrder,
+  AdminGroupAcceptOrder,
   deleteOrder,
   fetchListDebt,
 } from "@/provider/redux/thunk/order.thunk";
@@ -137,10 +137,10 @@ export default function ListDebtHistory() {
     if (!order) return;
     dispatch(showLoading());
     const res = await dispatch(
-      acceptOrder({ room_id: order.room.id, order_id: order.id })
+      AdminGroupAcceptOrder({ room_id: order.room.id, order_id: order.id })
     );
     dispatch(hideLoading());
-    if (res.type === "order/accept/fulfilled") {
+    if (res.type === "order/admin-group-accept-order/fulfilled") {
       dispatch(
         showNotify({
           messages: "Cập nhật trạng thái thanh toán thành công",

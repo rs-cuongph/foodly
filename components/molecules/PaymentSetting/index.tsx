@@ -20,6 +20,7 @@ import { updateUser } from "@/provider/redux/thunk/auth.thunk";
 import { v4 as uuidv4 } from "uuid";
 import { setPaymentSetting } from "@/provider/redux/reducer/auth.reducer";
 import { UserInfo } from "@/provider/redux/types/auth";
+import { capitalize } from "@/shared/helpers/capitalize";
 
 interface Props {}
 export default function PaymentSetting(props: Props) {
@@ -29,8 +30,7 @@ export default function PaymentSetting(props: Props) {
   const [openBlockAddPayment, setOpenBlockAddPayment] = useState(false);
 
   const paymentSettingForm = usePaymentSettingForm();
-  const { formState, getValues, setValue, control, watch, handleSubmit } =
-    paymentSettingForm;
+  const { formState, reset, control, watch, handleSubmit } = paymentSettingForm;
   const { errors } = formState;
 
   const getIcon = (key: string) => {
@@ -60,7 +60,10 @@ export default function PaymentSetting(props: Props) {
       updateUser({
         payment_setting: [
           ...(userInfo?.payment_setting as FormPaymentSettingType[]),
-          values,
+          {
+            ...values,
+            account_name: capitalize(values.account_name),
+          },
         ],
       })
     );
@@ -68,6 +71,7 @@ export default function PaymentSetting(props: Props) {
       dispatch(
         setPaymentSetting((res.payload as UserInfo["info"]).payment_setting)
       );
+      reset();
       setOpenBlockAddPayment(false);
     }
     dispatch(hideLoading());
@@ -81,21 +85,23 @@ export default function PaymentSetting(props: Props) {
       <div className="flex gap-2 flex-col">
         {(userInfo?.payment_setting || []).map((setting) => (
           <div
-            className="px-4 py-2 w-fit rounded-[12px] bg-[#e4e4e7] mb-4"
+            className="px-4 py-2 w-fit rounded-[12px] bg-[#e4e4e7]"
             key={setting.id}
           >
             <p className="text-[14px]">
               <strong>Phương thức:</strong> {setting.method}
             </p>
-            <p className="text-[14px]">
-              <strong>Tên/Số thẻ:</strong> {setting.account_name} /{" "}
-              {setting.account_number}
-            </p>
+            {setting.method !== "cash" && (
+              <p className="text-[14px]">
+                <strong>Tên/Số thẻ:</strong> {setting.account_name} /{" "}
+                {setting.account_number}
+              </p>
+            )}
           </div>
         ))}
       </div>
       {openBlockAddPayment && (
-        <div className="px-5 py-3 mb-2 bg-gray-200 rounded-lg w-[400px]">
+        <div className="px-5 py-3 mb-2 bg-gray-200 rounded-lg w-[400px]  mt-4">
           <form
             className="flex gap-2 flex-col"
             onSubmit={handleSubmit(onSubmit)}
@@ -158,20 +164,23 @@ export default function PaymentSetting(props: Props) {
           </form>
         </div>
       )}
-      {!openBlockAddPayment && userInfo?.payment_setting.length <= 3 && (
-        <Button
-          size="sm"
-          color="primary"
-          variant="bordered"
-          startContent={<PlusIcon className="h-4 w-4 text-primary" />}
-          onClick={() => {
-            if (userInfo?.payment_setting.length > 3) return;
-            setOpenBlockAddPayment(true);
-          }}
-        >
-          Thêm
-        </Button>
-      )}
+      {!openBlockAddPayment &&
+        userInfo?.payment_setting &&
+        userInfo.payment_setting.length <= 3 && (
+          <Button
+            className="mt-2"
+            size="sm"
+            color="primary"
+            variant="bordered"
+            startContent={<PlusIcon className="h-4 w-4 text-primary" />}
+            onClick={() => {
+              if (userInfo?.payment_setting?.length > 3) return;
+              setOpenBlockAddPayment(true);
+            }}
+          >
+            Thêm
+          </Button>
+        )}
     </div>
   );
 }

@@ -1,14 +1,20 @@
 import { useAppDispatch, useAppSelector } from "@/hooks/stores.hook";
 import {
   hideLoading,
+  setOpenModalOrder,
+  setOrderIForModalOrder,
+  setRoomIForModalOrder,
   showLoading,
   showNotify,
 } from "@/provider/redux/reducer/common.reducer";
 import { setSearchQuery } from "@/provider/redux/reducer/order.reducer";
 import { setParams } from "@/provider/redux/reducer/room.reducer";
-import { createOrder, editOrder } from "@/provider/redux/thunk/order.thunk";
+import {
+  confirmPaid,
+  createOrder,
+  editOrder,
+} from "@/provider/redux/thunk/order.thunk";
 import { Order } from "@/provider/redux/types/order";
-import { Room } from "@/provider/redux/types/room";
 import { PAYMENT_METHODS } from "@/shared/constants";
 import { generateQRImage } from "@/shared/helpers/generate";
 import {
@@ -33,28 +39,16 @@ import {
 } from "@nextui-org/react";
 import clsx from "clsx";
 import { delay } from "lodash";
-import {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-interface ModalOrderProps {
-  open: boolean;
-  setOpen: Dispatch<SetStateAction<boolean>>;
-  data?: Room;
-  order?: Order;
-}
-export default function ModalOrder({
-  open,
-  setOpen,
-  data,
-  order,
-}: ModalOrderProps) {
+interface ModalOrderProps {}
+export default function ModalOrder({}: ModalOrderProps) {
   const dispatch = useAppDispatch();
+  const open = useAppSelector((state) => state.common.modalOrderState.open);
+  const room = useAppSelector((state) => state.common.modalOrderState.room);
+  const order = useAppSelector((state) => state.common.modalOrderState.order);
+
+  const [orderCreated, setOrder] = useState<Order | null>(null);
   const [step, setStep] = useState(1);
   const [quanlity, setQuanlity] = useState("1");
   const [coupons, setCoupons] = useState<{ value: string; label: string }[]>(
@@ -65,88 +59,118 @@ export default function ModalOrder({
   const loading = useAppSelector((state) => state.common.loading);
 
   const paymentMethods = useMemo(() => {
-    if (!data) return [];
-    return data.creator.payment_setting.map((i) => ({
+    if (!room) return [];
+    return room.creator.payment_setting.map((i) => ({
       value: i.id,
       method: i.method,
       account_name: i.account_name,
       account_number: i.account_number,
       label: PAYMENT_METHODS.find((it) => it.value === i.method)?.label,
     }));
-  }, [data?.creator?.payment_setting]);
+  }, [room?.creator?.payment_setting]);
 
   const infoQR = useMemo(() => {
     return paymentMethods.find((i) => i.value === paymentSelected);
   }, [paymentSelected, paymentMethods]);
 
   const onClose = useCallback(() => {
-    setOpen(false);
-  }, [setOpen]);
+    dispatch(setOpenModalOrder(false));
+    dispatch(setRoomIForModalOrder(null));
+    dispatch(setOrderIForModalOrder(null));
+  }, []);
 
   const foodItems = useMemo(() => {
-    const items = data?.description
+    const items = room?.description
       .split(/\n/)
-      .map((item) => item.replace(/^- /, ""));
+      .map((item: string) => item.replace(/^- /, ""));
     return items ?? [];
-  }, [data]);
+  }, [room]);
 
-  const handleClose = useCallback(
-    (close: () => void) => {
-      if (step == 1) close();
-      else {
-        setStep((prev) => prev - 1);
-      }
-    },
-    [step, setStep]
-  );
+  const callApiToCreateNewOrder = useCallback(async () => {
+    if (!room) return;
+    const res = await dispatch(
+      createOrder({
+        room_id: room.id,
+        content: foodSelected.join(", "),
+        coupon_code: null,
+        payment_method: paymentMethods.find((i) => i.value === paymentSelected)
+          ?.method as string,
+        quanlity: parseInt(quanlity),
+        price: room.price,
+      })
+    );
 
-  const onCreate = useCallback(async () => {
-    if (step == 1) setStep(2);
-    else {
-      if (!data) return;
-      dispatch(showLoading());
-      const res = await dispatch(
-        createOrder({
-          room_id: data.id,
-          content: foodSelected.join(", "),
-          coupon_code: null,
-          payment_method: paymentMethods.find(
-            (i) => i.value === paymentSelected
-          )?.method as string,
-          quanlity: parseInt(quanlity),
-          price: data.price,
+    if (res.type === "order/create/rejected") {
+    } else {
+      setOrder(res.payload as Order);
+      setStep(2);
+      dispatch(
+        showNotify({
+          messages: "Đặt thành công",
+          type: "success",
+          duration: 3000,
+        })
+      );
+      dispatch(
+        setSearchQuery({
+          room_id: room.id,
+          page: 1,
+        })
+      );
+      dispatch(
+        setParams({
+          page: 1,
+        })
+      );
+    }
+    dispatch(hideLoading());
+  }, [step, setStep, room, dispatch, foodSelected, quanlity]);
+
+  const callApiToConfirmPaid = useCallback(async () => {
+    if (!room) return;
+    const res = await dispatch(
+      confirmPaid({
+        room_id: room.id,
+        order_id: orderCreated?.id!,
+        coupon_code: null,
+        payment_method: paymentMethods.find((i) => i.value === paymentSelected)
+          ?.method as string,
+      })
+    );
+
+    if (res.type === "order/confirm-paid/rejected") {
+    } else {
+      dispatch(
+        setSearchQuery({
+          room_id: room.id,
+          page: 1,
         })
       );
 
-      if (res.type === "order/create/rejected") {
-      } else {
-        dispatch(
-          showNotify({
-            messages: "Đặt thành công",
-            type: "success",
-            duration: 3000,
-          })
-        );
-        dispatch(
-          setSearchQuery({
-            room_id: data.id,
-            page: 1,
-          })
-        );
-        dispatch(
-          setParams({
-            page: 1,
-          })
-        );
-        setOpen(false);
-      }
-      dispatch(hideLoading());
+      dispatch(setOpenModalOrder(false));
+    }
+    dispatch(hideLoading());
+  }, [
+    step,
+    setStep,
+    dispatch,
+    paymentSelected,
+    foodSelected,
+    paymentMethods,
+    quanlity,
+  ]);
+
+  const onCreate = useCallback(async () => {
+    dispatch(showLoading());
+    if (step == 1) {
+      await callApiToCreateNewOrder();
+    } else {
+      await callApiToConfirmPaid();
     }
   }, [
     step,
-    setOpen,
     setStep,
-    data,
+    room,
     dispatch,
     paymentSelected,
     foodSelected,
@@ -155,11 +179,11 @@ export default function ModalOrder({
   ]);
 
   const onEdit = useCallback(async () => {
-    if (!data || !order) return;
+    if (!room || !order) return;
     dispatch(showLoading());
     const res = await dispatch(
       editOrder({
-        room_id: data.id,
+        room_id: room.id,
         order_id: order.id,
         content: foodSelected.join(", "),
         quanlity: parseInt(quanlity),
@@ -176,14 +200,14 @@ export default function ModalOrder({
       );
       dispatch(
         setSearchQuery({
-          room_id: data.id,
+          room_id: room.id,
           page: 1,
         })
       );
-      setOpen(false);
+      dispatch(setOpenModalOrder(false));
     }
     dispatch(hideLoading());
-  }, [data, order, quanlity, foodSelected]);
+  }, [room, order, quanlity, foodSelected]);
 
   const handleSelectionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setPaymentSelected(e.target.value);
@@ -191,6 +215,7 @@ export default function ModalOrder({
 
   useEffect(() => {
     if (open) {
+      dispatch(hideLoading());
       setStep(1);
       if (order) {
         setQuanlity(order.quanlity.toString());
@@ -335,7 +360,7 @@ export default function ModalOrder({
                         infoQR.method,
                         infoQR.account_number,
                         infoQR.account_name,
-                        data?.price || 0,
+                        room?.price || 0,
                         ""
                       )}
                     />
@@ -344,13 +369,11 @@ export default function ModalOrder({
               )}
             </ModalBody>
             <ModalFooter>
-              <Button
-                color="danger"
-                variant="light"
-                onClick={() => handleClose(onClose)}
-              >
-                {order ? "Đóng" : step === 1 ? "Đóng" : "Trở Lại"}
-              </Button>
+              {step === 1 && (
+                <Button color="danger" variant="light" onClick={onClose}>
+                  {"Đóng"}
+                </Button>
+              )}
               {order ? (
                 <Button color="primary" onClick={onEdit}>
                   Lưu

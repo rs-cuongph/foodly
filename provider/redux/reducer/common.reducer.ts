@@ -3,7 +3,13 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import { delay } from "lodash";
 import { v4 as uuidv4 } from "uuid";
 import { signUp } from "../thunk/auth.thunk";
-import { acceptOrder, deleteOrder, editOrder } from "../thunk/order.thunk";
+import {
+  AdminGroupAcceptOrder,
+  deleteOrder,
+  editOrder,
+} from "../thunk/order.thunk";
+import { Room } from "../types/room";
+import { Order } from "../types/order";
 
 interface NotifyState {
   type: "error" | "success" | "warning";
@@ -15,11 +21,21 @@ interface NotifyState {
 interface CommonState {
   loading: boolean;
   notify: NotifyState[];
+  modalOrderState: {
+    open: boolean;
+    room: Room | null;
+    order?: Order | null;
+  };
 }
 
 const initialState: CommonState = {
   loading: false,
   notify: [],
+  modalOrderState: {
+    open: false,
+    room: null,
+    order: null,
+  },
 };
 
 export const showNotify = createAsyncThunk(
@@ -60,6 +76,15 @@ const commonSlice = createSlice({
         state.notify.splice(index, 1);
       }
     },
+    setOpenModalOrder(state, action: PayloadAction<boolean>) {
+      state.modalOrderState.open = action.payload;
+    },
+    setRoomIForModalOrder(state, action: PayloadAction<Room | null>) {
+      state.modalOrderState.room = action.payload;
+    },
+    setOrderIForModalOrder(state, action: PayloadAction<Order | null>) {
+      state.modalOrderState.order = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(deleteOrder.rejected, (state, action) => {
@@ -80,7 +105,7 @@ const commonSlice = createSlice({
         id: _id,
       });
     });
-    builder.addCase(acceptOrder.rejected, (state, action) => {
+    builder.addCase(AdminGroupAcceptOrder.rejected, (state, action) => {
       const _id = uuidv4();
       state.notify.push({
         messages: "Đã xảy ra lỗi !!!",
@@ -92,6 +117,13 @@ const commonSlice = createSlice({
   },
 });
 
-export const { showLoading, hideLoading, showNotifyAction, clearNotify } =
-  commonSlice.actions;
+export const {
+  showLoading,
+  hideLoading,
+  showNotifyAction,
+  clearNotify,
+  setOpenModalOrder,
+  setRoomIForModalOrder,
+  setOrderIForModalOrder,
+} = commonSlice.actions;
 export default commonSlice;

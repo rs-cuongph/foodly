@@ -48,6 +48,9 @@ import { Room } from "@/provider/redux/types/room";
 import { useSession } from "next-auth/react";
 import {
   hideLoading,
+  setOpenModalOrder,
+  setOrderIForModalOrder,
+  setRoomIForModalOrder,
   showLoading,
 } from "@/provider/redux/reducer/common.reducer";
 
@@ -57,9 +60,8 @@ interface OrderTableProps {
 export default function OrderTable({ data }: OrderTableProps) {
   const isLoading = useAppSelector((state) => state.order.loadingList);
   const searchQuery = useAppSelector((state) => state.order.searchQuery);
+  const order = useAppSelector((state) => state.common.modalOrderState.order);
   const session = useSession();
-  const [isOpenModalOrder, setOpenModalOrder] = useState(false);
-  const [order, setOrder] = useState<Order | undefined>(undefined);
   const loadingState = useMemo(
     () => (isLoading ? "loading" : "idle"),
     [isLoading]
@@ -160,13 +162,14 @@ export default function OrderTable({ data }: OrderTableProps) {
   }, []);
 
   const handleOpenModalEdit = useCallback((order: Order) => {
-    setOrder(order);
-    setOpenModalOrder(true);
+    dispatch(setOpenModalOrder(true));
+    dispatch(setRoomIForModalOrder(data));
+    dispatch(setOrderIForModalOrder(order));
   }, []);
 
   const handleOpenModalDelete = useCallback((order: Order) => {
     if (order.status !== "processing") return;
-    setOrder(order);
+    dispatch(setOrderIForModalOrder(order));
     setOpenModalDeleteOrder(true);
   }, []);
 
@@ -375,12 +378,7 @@ export default function OrderTable({ data }: OrderTableProps) {
         setOpen={setOpenModalDeleteOrder}
         onSubmit={onDeleteOrder}
       />
-      <ModalOrder
-        open={isOpenModalOrder}
-        setOpen={setOpenModalOrder}
-        data={data}
-        order={order}
-      />
+      <ModalOrder />
     </div>
   );
 }

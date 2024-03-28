@@ -30,7 +30,7 @@ export interface CreateOrderI {
   content: string;
   quanlity: number;
   price: number;
-  payment_method: string;
+  payment_method: string | null;
   coupon_code: string | null;
 }
 
@@ -66,7 +66,9 @@ export interface DeleteOrderI {
   order_id: string;
 }
 
-export interface AcceptOrderI {
+export interface ChangeStatusOrderI {
   room_id: string;
   order_id: string;
+  payment_method: string;
+  coupon_code: string | null;
 }

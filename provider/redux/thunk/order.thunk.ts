@@ -2,7 +2,7 @@ import { request } from "@/shared/axios";
 import { getRoute } from "@/shared/helpers/route";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
-  AcceptOrderI,
+  ChangeStatusOrderI,
   CreateOrderI,
   DeleteOrderI,
   EditOrderI,
@@ -86,6 +86,32 @@ export const fetchListDebt = createAsyncThunk<ListOrderResponseI, ListOrderI>(
   }
 );
 
+export const fetchListMyOrder = createAsyncThunk<
+  ListOrderResponseI,
+  ListOrderI
+>(
+  "order/my-order",
+  async (data) => {
+    return request({
+      url:
+        getRoute("my-orders") +
+        qs.stringify(data, {
+          addQueryPrefix: true,
+          arrayFormat: "brackets",
+        }),
+      method: "GET",
+    });
+  },
+  {
+    serializeError: (error: any) => {
+      return {
+        code: error?.errorCode,
+        message: error?.message,
+      };
+    },
+  }
+);
+
 export const deleteOrder = createAsyncThunk<void, DeleteOrderI>(
   "order/delete",
   async (data) => {
@@ -107,8 +133,8 @@ export const deleteOrder = createAsyncThunk<void, DeleteOrderI>(
   }
 );
 
-export const acceptOrder = createAsyncThunk<void, AcceptOrderI>(
-  "order/accept",
+export const AdminGroupAcceptOrder = createAsyncThunk<void, ChangeStatusOrderI>(
+  "order/admin-group-accept-order",
   async (data) => {
     return request({
       url: getRoute("rooms/:room_id/orders/:order_id/update-status/:status", {
@@ -117,6 +143,31 @@ export const acceptOrder = createAsyncThunk<void, AcceptOrderI>(
         status: "paid",
       }),
       method: "PATCH",
+    });
+  },
+  {
+    serializeError: (error: any) => {
+      return {
+        code: error?.errorCode,
+        message: error?.message,
+      };
+    },
+  }
+);
+
+export const confirmPaid = createAsyncThunk<void, ChangeStatusOrderI>(
+  "order/confirm-paid",
+  async (data) => {
+    return request({
+      url: getRoute("rooms/:room_id/orders/:order_id/confirm_paid", {
+        room_id: data.room_id,
+        order_id: data.order_id,
+      }),
+      method: "PATCH",
+      data: {
+        payment_method: data.payment_method,
+        coupon_code: data.coupon_code,
+      },
     });
   },
   {
