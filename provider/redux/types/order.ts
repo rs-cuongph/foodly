@@ -69,6 +69,6 @@ export interface DeleteOrderI {
 export interface ChangeStatusOrderI {
   room_id: string;
   order_id: string;
-  payment_method: string;
-  coupon_code: string | null;
+  payment_method?: string;
+  coupon_code?: string | null;
 }
