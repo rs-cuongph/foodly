@@ -78,7 +78,7 @@ export default function GroupOrderItem({ data }: OrderItemProps) {
   }, [session, data]);
 
   return (
-    <CardWrapper className="relative">
+    <CardWrapper className="relative card-group-item-element">
       <Image
         className="rounded-[15px] h-[165px] object-cover"
         src={imageDefault.src}
