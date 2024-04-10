@@ -18,7 +18,7 @@ export default function Header() {
   return (
     <HeaderWrapper
       className={clsx(
-        "absolute top-[10px] right-[0px] flex flex-row w-full pl-4 pr-4",
+        "absolute top-[10px] right-[0px] flex flex-row w-full pl-4 pr-4 header-wrapper",
         isMobile ? "justify-center" : "justify-between"
       )}
     >

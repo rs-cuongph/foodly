@@ -20,7 +20,7 @@ interface ModalDeleteProps {
 }
 export default function ModalConfirm({
   onSubmit,
-  title = "Xác Nhận",
+  title = "Xác nhận đã thanh toán",
   content = "Bạn chắc chắn chưa?",
   ...rest
 }: ModalDeleteProps) {

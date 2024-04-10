@@ -38,6 +38,7 @@ import { delay } from "lodash";
 import ControlledInput from "@/components/atoms/ControlledInput";
 import ControlledTextarea from "@/components/atoms/ControlledTextarea";
 import { Room } from "@/provider/redux/types/room";
+import { useTour } from "@/hooks/useTour";
 
 interface CreateRoomProps {
   editData?: Room;
@@ -47,6 +48,7 @@ export default function ModalCreateRoom({ editData }: CreateRoomProps) {
   const [mode, setMode] = useState(false);
   const session = useSession();
   const dispatch = useAppDispatch();
+  const [driverObj] = useTour();
   const form = useCreateRoomForm();
   const usersState = useAppSelector((state) => state.room.users);
   const open = useAppSelector((state) => state.room.isOpenModalCreateOrder);
@@ -56,6 +58,7 @@ export default function ModalCreateRoom({ editData }: CreateRoomProps) {
   const [users, setUsers] = useState<{ label: string; value: string }[]>([]);
   const onClose = () => {
     dispatch(setOpenModalCreateRoom(false));
+    driverObj.drive(4);
   };
 
   const onSubmit = async (values: FormCreateRoomType) => {
@@ -154,7 +157,10 @@ export default function ModalCreateRoom({ editData }: CreateRoomProps) {
         <ModalContent>
           {(onClose) => (
             <>
-              <form onSubmit={form.handleSubmit(onSubmit)} className={""}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="modal-create-group-element"
+              >
                 <ModalHeader className="flex flex-col gap-1 text-center">
                   <div>{editData ? "Chỉnh Sửa" : "Tạo Mới"} </div>
                 </ModalHeader>
@@ -250,7 +256,7 @@ export default function ModalCreateRoom({ editData }: CreateRoomProps) {
                     </Select>
                   )} */}
                 </ModalBody>
-                <ModalFooter>
+                <ModalFooter className="modal-create-group-footer-element">
                   <Button color="danger" variant="light" onPress={onClose}>
                     Close
                   </Button>

@@ -231,6 +231,7 @@ export default function ListDebtHistory() {
               color="success"
               variant={"light"}
               isIconOnly
+              className="button-confirm-element"
             >
               <CheckCircleIcon className="h-5 w-5 text-success" />
             </Button>
@@ -240,6 +241,7 @@ export default function ListDebtHistory() {
               color="danger"
               variant={"light"}
               isIconOnly
+              className="button-delete-element"
             >
               <TrashIcon className="h-5 w-5 text-red-500 cursor-pointer" />
             </Button>
@@ -252,7 +254,7 @@ export default function ListDebtHistory() {
 
   const topContent = useMemo(() => {
     return (
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 list-history-header-element">
         <div className="flex justify-between gap-3 items-end">
           <div className="w-full max-w-[60%] flex gap-2 flex-wrap sm:flex-nowrap">
             <Input
@@ -383,7 +385,7 @@ export default function ListDebtHistory() {
   }, [page, searchByKey, sortDescriptor]);
 
   return (
-    <div className="bg-white p-[15px] rounded-[10px]">
+    <div className="bg-white p-[15px] rounded-[10px] list-history-element">
       <Table
         aria-label="table"
         aria-labelledby="table"
