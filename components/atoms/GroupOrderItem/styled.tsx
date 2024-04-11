@@ -11,6 +11,7 @@ export const CardWrapper = styled.div`
   box-shadow: 5px 5px rgb(203 245 242 / 40%), 10px 10px rgb(225 244 242 / 30%);
   @media (max-width: 765px) {
     width: calc(50% - 2rem - 5px);
+    min-width: 316px;
   }
   @media (max-width: 425px) {
     width: 100%;

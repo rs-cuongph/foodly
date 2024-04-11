@@ -4,6 +4,7 @@ import Header from "@/components/molecules/Header";
 import Main from "@/components/molecules/Main";
 import ModalLogin from "@/components/molecules/ModalLogin";
 import Sidebar from "@/components/molecules/Sidebar";
+import Contributors from "@/components/atoms/Contributors"
 import { useAppDispatch } from "@/hooks/stores.hook";
 import { getCurrentUser } from "@/provider/redux/thunk/auth.thunk";
 import authenticationSession from "@/shared/authenticationSession";
@@ -54,6 +55,7 @@ export default function RootLayout({
           <Sidebar />
           <div className="content overscroll-y-auto">{children}</div>
           <ModalLogin />
+          <Contributors />
         </>
       )}
     </Main>
