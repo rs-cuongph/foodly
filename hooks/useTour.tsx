@@ -137,9 +137,9 @@ export const useTour = () => {
     allowClose: false,
     disableActiveInteraction: true,
     steps: STEPS_NEWBIE,
-    nextBtnText: "tiếp",
-    prevBtnText: "trở về",
-    doneBtnText: "kết thúc",
+    nextBtnText: "Tiếp",
+    prevBtnText: "Trở về",
+    doneBtnText: "Đóng",
   });
 
   return [driverObj];
