@@ -19,7 +19,7 @@ export const useTour = () => {
       element: ".header-wrapper",
       popover: {
         title: "FOODLY BOOKING",
-        description: "Welcome to FOODLY BOOKING!",
+        description: "Chào mừng bạn đến với FOODLY BOOKING!",
       },
     },
     {
@@ -79,7 +79,7 @@ export const useTour = () => {
     {
       element: ".list-history-header-element",
       popover: {
-        title: "Thanh công cụ search",
+        title: "Thanh công cụ tìm kiếm",
         description: "Tại đây bạn có thể lọc và tìm kiếm lịch sử bạn mong muốn",
       },
     },
@@ -125,7 +125,7 @@ export const useTour = () => {
       popover: {
         title: "Chúc bạn có một trải nghiệm Foodly Booking vui vẻ!",
         onNextClick: () => {
-          localStorage.setItem("isFirstLogin", "true");
+          localStorage.setItem("isFirstLogin", "false");
           driverObj.moveNext();
         },
       },
@@ -137,6 +137,9 @@ export const useTour = () => {
     allowClose: false,
     disableActiveInteraction: true,
     steps: STEPS_NEWBIE,
+    nextBtnText: "Tiếp",
+    prevBtnText: "Trở về",
+    doneBtnText: "Đóng",
   });
 
   return [driverObj];

@@ -40,7 +40,7 @@ export default function Contributor() {
     >
       <Popover isOpen={isOpen} onOpenChange={(open) => setIsOpen(open)}>
         <PopoverTrigger>
-          <div className="bg-transparent hover:opacity-80 w-[50px] h-[50px] flex items-center justify-center rounded-[50%] bg-white bg-opacity-80 cursor-pointer"><UsersIcon /></div>
+          <div className="bg-transparent hover:opacity-80 w-[50px] h-[50px] flex items-center justify-center rounded-[50%] bg-white bg-opacity-80 cursor-pointer shadow-xl"><UsersIcon /></div>
         </PopoverTrigger>
         <PopoverContent className="p-4 translate-x-[-8px] md:translate-x-[-28px] translate-y-[-10px] shadow-2xl bg-white bg-opacity-80">
           <h3 className="font-bold text-sm">Người đóng góp</h3>
