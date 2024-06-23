@@ -80,7 +80,7 @@ export default function PaymentSetting(props: Props) {
   return (
     <div className="bg-white px-[30px] py-[30px] rounded-[10px] max-w-[768px]">
       <h3 className={`${classes["payment-setting__title"]} text-primary`}>
-        Cài đặt thanh toán
+        Cài Đặt Thanh Toán
       </h3>
       <div className="flex gap-2 flex-col">
         {(userInfo?.payment_setting || []).map((setting) => (

@@ -10,7 +10,7 @@ export const ROUTES = {
 
 export const PAGINATION_PARAMS = {
   DEFAULT_PAGE: 1,
-  DEFAULT_PAGE_SIZE: 50,
+  DEFAULT_PAGE_SIZE: 10,
 };
 
 export enum SHARE_SCOPE {

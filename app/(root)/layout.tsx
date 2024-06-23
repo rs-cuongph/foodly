@@ -30,14 +30,16 @@ export default function RootLayout({
   }, [session]);
 
   return (
-    <Main className="h-screen p-2 flex flex-row gap-4">
+    <Main className="h-screen p-2 flex flex-row gap-4 ">
       {session.status === "loading" ? (
         <></>
       ) : (
         <>
           <Header />
-          <Sidebar />
-          <div className="content overscroll-y-auto">{children}</div>
+          <div className="flex flex-row w-full max-w-[1440px] mx-auto gap-4">
+            <Sidebar />
+            <div className="content overscroll-y-auto">{children}</div>
+          </div>
           <ModalLogin />
         </>
       )}

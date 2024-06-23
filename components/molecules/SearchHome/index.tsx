@@ -18,7 +18,7 @@ import {
 } from "@nextui-org/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { debounce } from "lodash";
-import { useAppDispatch } from "@/hooks/stores.hook";
+import { useAppDispatch, useAppSelector } from "@/hooks/stores.hook";
 import {
   resetParams,
   setOpenModalCreateRoom,
@@ -33,6 +33,7 @@ import clsx from "clsx";
 export default function SearchHeaderHome() {
   const dispatch = useAppDispatch();
   const session = useSession();
+  const userInfo = useAppSelector((state) => state.auth.userInfo);
   const [selectedKeys, setSelectedKeys] = useState<Selection>(
     new Set(["open"])
   );
@@ -133,9 +134,20 @@ export default function SearchHeaderHome() {
         color="primary"
         size="md"
         onClick={() => {
-          if (session.status === "authenticated")
-            dispatch(setOpenModalCreateRoom(true));
-          else {
+          if (session.status === "authenticated") {
+            if (!userInfo?.payment_setting.length)
+              dispatch(
+                showNotify({
+                  messages:
+                    "vui lòng thêm phương thức thanh toán. (Tôi -> Cài đặt thanh toán)",
+                  type: "warning",
+                  duration: 2000,
+                })
+              );
+            else {
+              dispatch(setOpenModalCreateRoom(true));
+            }
+          } else {
             dispatch(
               showNotify({
                 messages: "vui lòng đăng nhập trước",

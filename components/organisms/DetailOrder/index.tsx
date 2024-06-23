@@ -21,6 +21,8 @@ import {
   ShareIcon,
   ShoppingCartIcon,
   TrashIcon,
+  UserGroupIcon,
+  CurrencyDollarIcon,
 } from "@heroicons/react/24/solid";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -44,12 +46,17 @@ import {
   setRoomIForModalOrder,
   showNotify,
 } from "@/provider/redux/reducer/common.reducer";
-import { RemainingTime } from "@/components/atoms/GroupOrderItem/styled";
+import {
+  Money,
+  RemainingTime,
+  TotalOrder,
+} from "@/components/atoms/GroupOrderItem/styled";
 import { ROUTES } from "@/shared/constants";
 import ModalCreateRoom from "../../molecules/ModalCreateRoom";
 import { setOpenModalCreateRoom } from "@/provider/redux/reducer/room.reducer";
 import OrderTable from "../../molecules/OrderTable";
 import ModalDeleteRoom from "@/components/molecules/ModalDelete";
+import { formatCurrency } from "@/shared/helpers/currency";
 
 export default function DetailOrder() {
   const router = useRouter();
@@ -137,7 +144,7 @@ export default function DetailOrder() {
         dispatch(
           showNotify({
             messages: "Copy Link Order Fail",
-            type: "error",
+            type: "success",
           })
         );
       });
@@ -189,9 +196,9 @@ export default function DetailOrder() {
             />
           </ImageWrapperStyled>
           <InfoHeaderStyled className="bg-white rounded-medium min-w-[250px] min-h-[150px] flex justify-between gap-1 flex-col md:flex-row">
-            <div className="flex flex-row justify-between">
+            <div className="flex flex-row justify-between ">
               <div>
-                <div className="flex gap-2 mb-2">
+                <div className="flex gap-2 mb-2 flex-wrap">
                   <OrderDate className="bg-gray-600 flex flex-row gap-1">
                     {room.created_at &&
                       formatTime(room.created_at, "DD-MM-YYYY HH:mm")}
@@ -204,28 +211,38 @@ export default function DetailOrder() {
                     <ClockIcon className="h-4 w-4 text-primary" />
                     {time}
                   </RemainingTime>
+                  <TotalOrder className="flex flex-row gap-[2px]">
+                    <UserGroupIcon className="h-4 w-4 text-primary" />
+                    {room.total_item}
+                  </TotalOrder>
+                  <Money className="flex flex-row gap-[2px]">
+                    <CurrencyDollarIcon className="h-4 w-4 text-primary" />
+                    {formatCurrency(room.price, "")}
+                    <span className="unit ml-1">vnđ</span>
+                  </Money>
                 </div>
                 <h3>{room.name}</h3>
                 <p>{room.description}</p>
               </div>
-              <>{isMobile && renderMoreItem()}</>
+              {isMobile ? renderMoreItem() : <></>}
             </div>
             <ActionStyled
               className={`flex gap-[5px] max-w-[${
                 isMobile ? "100%" : "170px"
               }] flex-col justify-between items-end`}
             >
-              {!isMobile && renderMoreItem()}
-
-              <ButtonWrapper
-                color="primary"
-                size={isMobile ? "sm" : "md"}
-                fullWidth
-                onClick={openModalOrder}
-              >
-                <ShoppingCartIcon className="h-4 w-4 text-white" />
-                Đặt
-              </ButtonWrapper>
+              {!isMobile ? renderMoreItem() : <></>}
+              {time !== 0 && (
+                <ButtonWrapper
+                  color="primary"
+                  size={isMobile ? "sm" : "md"}
+                  fullWidth
+                  onClick={openModalOrder}
+                >
+                  <ShoppingCartIcon className="h-4 w-4 text-white" />
+                  Đặt
+                </ButtonWrapper>
+              )}
             </ActionStyled>
           </InfoHeaderStyled>
         </DetailHeaderStyled>

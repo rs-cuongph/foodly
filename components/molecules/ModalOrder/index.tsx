@@ -329,7 +329,7 @@ export default function ModalOrder({}: ModalOrderProps) {
                   <div className="flex gap-2 w-[100%] sm:flex-row flex-col">
                     <Select
                       size={"sm"}
-                      label="Select an payment method"
+                      label="Chọn cách thức thanh toán"
                       className="max-w-[220px]"
                       selectedKeys={[paymentSelected]}
                       onChange={handleSelectionChange}
@@ -342,7 +342,7 @@ export default function ModalOrder({}: ModalOrderProps) {
                         );
                       })}
                     </Select>
-                    <Select size={"sm"} label="Select an coupon" className="">
+                    <Select size={"sm"} label="Chọn mã giảm giá" className="">
                       {coupons.map((cp) => {
                         return (
                           <SelectItem key={cp.value} value={cp.value}>

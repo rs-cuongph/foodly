@@ -83,10 +83,12 @@ export default function OrderTable({ data }: OrderTableProps) {
   const orders = useAppSelector((state) => state.order.orders);
 
   const totalPage = useMemo(() => {
+    if (!orders.pagination.total_record) return 1;
     return Math.ceil(
       orders.pagination.total_record / PAGINATION_PARAMS.DEFAULT_PAGE_SIZE
     );
   }, [orders.pagination.total_record]);
+
   const headerColumns = useMemo(() => {
     if (visibleColumns === "all") return columns;
 

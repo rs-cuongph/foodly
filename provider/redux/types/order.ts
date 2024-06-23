@@ -2,11 +2,18 @@ interface Room {
   id: string;
   room_id: string;
   name: string;
+  creator: Creator;
 }
 interface Creator {
   email: string;
   role: string;
   id: string;
+  payment_setting: {
+    account_name: string;
+    account_number: string;
+    id: string;
+    method: "vietcombank" | "zalopay" | "momo" | "cash" | "";
+  }[];
 }
 
 export interface Order {

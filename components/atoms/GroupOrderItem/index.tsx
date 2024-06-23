@@ -87,7 +87,7 @@ export default function GroupOrderItem({ data }: OrderItemProps) {
         alt=""
       />
       <Money className="absolute top-[10px] left-3">
-        {formatCurrency(data.price)}
+        {formatCurrency(data.price, "")}
         <span className="unit ml-1">vnđ</span>
       </Money>
       {time !== 0 && (

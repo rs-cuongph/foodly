@@ -17,6 +17,7 @@ import {
 } from "@heroicons/react/24/solid";
 import {
   Button,
+  Checkbox,
   Chip,
   Dropdown,
   DropdownItem,
@@ -84,14 +85,19 @@ export default function ListDebtHistory() {
   const [visibleColumns, setVisibleColumns] = useState<Selection>(
     new Set(INITIAL_VISIBLE_COLUMNS)
   );
+  const [statusesFilter, setStatusesFilter] = useState<Selection>(
+    new Set(statusOptions.map((i) => i.uid))
+  );
   const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
     column: "created_at",
     direction: "descending",
   });
   const [searchByKey, setSearchByKey] = useState(new Set(["room"]));
+
   const [isOpenModalConfirm, setOpenModalConfirm] = useState(false);
   const [isOpenModalDeleteOrder, setOpenModalDeleteOrder] = useState(false);
   const [order, setOrder] = useState<Order | undefined>(undefined);
+
   const searchByValue = useMemo(() => {
     return searchByOptions.find((i) => Array.from(searchByKey).includes(i.uid))
       ?.name;
@@ -114,6 +120,11 @@ export default function ListDebtHistory() {
     );
   }, [visibleColumns]);
 
+  const statusesSelected = useMemo(
+    () => Array.from(statusesFilter).join(", ").replaceAll("_", " "),
+    [statusesFilter]
+  );
+
   const onDeleteOrder = async () => {
     if (!order) return;
     dispatch(showLoading());
@@ -125,7 +136,7 @@ export default function ListDebtHistory() {
       dispatch(
         showNotify({
           messages: "Xoá thành công",
-          type: "error",
+          type: "success",
         })
       );
       dispatch(fetchListDebt(searchQuery));
@@ -144,7 +155,7 @@ export default function ListDebtHistory() {
       dispatch(
         showNotify({
           messages: "Cập nhật trạng thái thanh toán thành công",
-          type: "error",
+          type: "success",
         })
       );
       dispatch(fetchListDebt(searchQuery));
@@ -153,6 +164,7 @@ export default function ListDebtHistory() {
   };
 
   const totalPage = useMemo(() => {
+    if (!debtList.pagination.total_record) return 1;
     return Math.ceil(
       debtList.pagination.total_record / PAGINATION_PARAMS.DEFAULT_PAGE_SIZE
     );
@@ -226,23 +238,27 @@ export default function ListDebtHistory() {
             >
               <PencilSquareIcon className="h-5 w-5 text-[#fe724c]" />
             </Button> */}
-            <Button
-              onClick={() => handleOpenModalConfirm(order)}
-              color="success"
-              variant={"light"}
-              isIconOnly
-            >
-              <CheckCircleIcon className="h-5 w-5 text-success" />
-            </Button>
+            {["init", "processing, reviewing"].includes(order.status) && (
+              <Button
+                onClick={() => handleOpenModalConfirm(order)}
+                color="success"
+                variant={"light"}
+                isIconOnly
+              >
+                <CheckCircleIcon className="h-5 w-5 text-success" />
+              </Button>
+            )}
 
-            <Button
-              onClick={() => handleOpenModalDelete(order)}
-              color="danger"
-              variant={"light"}
-              isIconOnly
-            >
-              <TrashIcon className="h-5 w-5 text-red-500 cursor-pointer" />
-            </Button>
+            {["init", "processing, reviewing"].includes(order.status) && (
+              <Button
+                onClick={() => handleOpenModalDelete(order)}
+                color="danger"
+                variant={"light"}
+                isIconOnly
+              >
+                <TrashIcon className="h-5 w-5 text-red-500 cursor-pointer" />
+              </Button>
+            )}
           </div>
         );
       default:
@@ -254,7 +270,7 @@ export default function ListDebtHistory() {
     return (
       <div className="flex flex-col gap-4">
         <div className="flex justify-between gap-3 items-end">
-          <div className="w-full max-w-[60%] flex gap-2 flex-wrap sm:flex-nowrap">
+          <div className="w-full max-w-[70%] flex gap-2 flex-wrap sm:flex-nowrap">
             <Input
               isClearable
               classNames={{
@@ -305,6 +321,45 @@ export default function ListDebtHistory() {
                 ))}
               </DropdownMenu>
             </Dropdown>
+            <Dropdown>
+              <DropdownTrigger className="hidden sm:flex">
+                <Button
+                  className="min-w-[180px]"
+                  endContent={<ChevronDownIcon className="h-3 w-3" />}
+                  size="sm"
+                  variant="flat"
+                >
+                  Trạng thái:{" "}
+                  <Tooltip
+                    content={statusesSelected}
+                    color="default"
+                    classNames={{
+                      content: ["py-2 px-4 shadow-xl", "text-black bg-gray-50"],
+                    }}
+                  >
+                    <span className="text-primary">
+                      {statusesSelected?.length > 10
+                        ? statusesSelected.substring(0, 10) + "..."
+                        : statusesSelected}
+                    </span>
+                  </Tooltip>
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                disallowEmptySelection
+                aria-label="Table Columns"
+                closeOnSelect={false}
+                selectedKeys={statusesFilter}
+                selectionMode="multiple"
+                onSelectionChange={setStatusesFilter}
+              >
+                {statusOptions.map((status) => (
+                  <DropdownItem key={status.uid} className="capitalize">
+                    {capitalize(status.name)}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
           </div>
 
           <div className="flex gap-3">
@@ -342,7 +397,13 @@ export default function ListDebtHistory() {
         </div>
       </div>
     );
-  }, [searchByKey, visibleColumns, debtList.pagination.total_record]);
+  }, [
+    searchByKey,
+    visibleColumns,
+    debtList.pagination.total_record,
+    statusesFilter,
+    statusesSelected,
+  ]);
 
   const bottomContent = useMemo(() => {
     return (
@@ -375,12 +436,13 @@ export default function ListDebtHistory() {
     dispatch(
       setSearchQuery({
         page,
+        status: Array.from(statusesFilter).map((i) => i.toString()),
         search_by: Array.from(searchByKey)[0],
         sort_by: sortDescriptor.column?.toString(),
         sort_type: sortDescriptor.direction === "ascending" ? "ASC" : "DESC",
       })
     );
-  }, [page, searchByKey, sortDescriptor]);
+  }, [page, searchByKey, sortDescriptor, statusesFilter]);
 
   return (
     <div className="bg-white p-[15px] rounded-[10px]">

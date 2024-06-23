@@ -56,7 +56,7 @@ import {
 import { PAGINATION_PARAMS } from "@/shared/constants";
 import { OrderId } from "../ListDebtHistory/styled";
 import { capitalize } from "@/shared/helpers/capitalize";
-import ModalQrPayment from "../ModalQrPayment";
+import ModalQrPayment, { SubmitData } from "../ModalQrPayment";
 interface Props {}
 
 const classNames = {
@@ -108,18 +108,23 @@ export default function MyDebtHistory(props: Props) {
     );
   }, [visibleColumns]);
 
-  const onConfirmPaid = async () => {
+  const onConfirmPaid = async (data: SubmitData) => {
     if (!order) return;
     dispatch(showLoading());
     const res = await dispatch(
-      confirmPaid({ room_id: order.room.id, order_id: order.id })
+      confirmPaid({
+        room_id: data.room_id,
+        order_id: data.order_id,
+        coupon_code: data.coupon_code,
+        payment_method: data.payment_method,
+      })
     );
     dispatch(hideLoading());
     if (res.type === "order/admin-group-accept-order/fulfilled") {
       dispatch(
         showNotify({
           messages: "Cập nhật trạng thái thanh toán thành công",
-          type: "error",
+          type: "success",
         })
       );
       dispatch(fetchListMyOrder(searchQuery));
@@ -128,6 +133,7 @@ export default function MyDebtHistory(props: Props) {
   };
 
   const totalPage = useMemo(() => {
+    if (!debtList.pagination.total_record) return 1;
     return Math.ceil(
       debtList.pagination.total_record / PAGINATION_PARAMS.DEFAULT_PAGE_SIZE
     );
@@ -276,6 +282,7 @@ export default function MyDebtHistory(props: Props) {
   }, [searchByKey, visibleColumns, debtList.pagination.total_record]);
 
   const bottomContent = useMemo(() => {
+    console.log(totalPage);
     return (
       <div className="py-2 px-2 flex justify-between items-center">
         <Pagination
@@ -316,7 +323,7 @@ export default function MyDebtHistory(props: Props) {
   return (
     <div className="bg-white px-[30px] py-[30px] rounded-[10px] ">
       <h3 className={`${classes["payment-setting__title"]} text-primary`}>
-        Lịch sử nợ
+        Lịch Sử Nợ
       </h3>
       <div className="flex gap-2 flex-col">
         <Table
@@ -367,7 +374,7 @@ export default function MyDebtHistory(props: Props) {
         open={isOpenModalConfirm}
         setOpen={setOpenModalConfirm}
         order={order}
-        onSubmit={() => onConfirmPaid()}
+        onSubmit={(data) => onConfirmPaid(data)}
       />
     </div>
   );

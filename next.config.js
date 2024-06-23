@@ -11,7 +11,7 @@ const nextConfig = {
   },
   images: {
     minimumCacheTTL: 60,
-    domains: ["s3-alpha-sig.figma.com"],
+    domains: ["s3-alpha-sig.figma.com", "img.vietqr.io"],
   },
 };
 

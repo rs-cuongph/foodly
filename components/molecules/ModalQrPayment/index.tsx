@@ -9,13 +9,27 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Select,
+  SelectItem,
 } from "@nextui-org/react";
 import Image from "next/image";
-import { Dispatch, SetStateAction, useCallback, useMemo } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
 
+export interface SubmitData {
+  room_id: string;
+  order_id: string;
+  coupon_code: string | null;
+  payment_method: string;
+}
 interface ModalQrPaymentProps {
   open: boolean;
-  onSubmit: () => void;
+  onSubmit: (data: SubmitData) => void;
   setOpen: Dispatch<SetStateAction<boolean>>;
   order: Order | undefined;
 }
@@ -25,13 +39,31 @@ export default function ModalQrPayment({
   ...rest
 }: ModalQrPaymentProps) {
   const loading = useAppSelector((state) => state.common.loading);
+  const [paymentSelected, setPaymentSelected] = useState<string | undefined>();
+  const [coupons, setCoupons] = useState<{ value: string; label: string }[]>(
+    []
+  );
 
   const onClose = useCallback(() => {
     rest.setOpen(false);
   }, [rest]);
+
+  const paymentMethods = useMemo(() => {
+    console.log(order?.room?.creator);
+    return order?.room?.creator?.payment_setting ?? [];
+  }, [order]);
+
+  const infoQR = useMemo(() => {
+    return paymentMethods.find((i) => i.method === order?.payment_method);
+  }, [paymentMethods]);
+
+  const handleSelectionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setPaymentSelected(e.target.value);
+  };
+
   return (
     <Modal
-      size={"md"}
+      size={"xl"}
       isOpen={rest.open}
       onClose={onClose}
       isDismissable={false}
@@ -42,26 +74,68 @@ export default function ModalQrPayment({
             <ModalHeader className="flex flex-col gap-1">
               {"Xác Nhận"}
             </ModalHeader>
-            <ModalBody>
-              {/* {order && (
-                  <Image
-                    width={300}
-                    alt="NextUI hero Image"
-                    src={generateQRImage(
-                      order.payment_method,
-                      infoQR.account_number,
-                      infoQR.account_name,
-                      data?.price || 0,
-                      ""
-                    )}
-                  />
-                )} */}
+            <ModalBody className="flex justify-center items-center">
+              <div className="flex gap-2 w-[100%] sm:flex-row flex-col">
+                <Select
+                  size={"sm"}
+                  label="Chọn cách thức thanh toán"
+                  className="max-w-[220px]"
+                  selectedKeys={paymentSelected ? [paymentSelected] : []}
+                  onChange={handleSelectionChange}
+                >
+                  {paymentMethods.map((pay) => {
+                    return (
+                      <SelectItem key={pay.id} value={pay.id}>
+                        {pay.method}
+                      </SelectItem>
+                    );
+                  })}
+                </Select>
+                <Select size={"sm"} label="Chọn mã giảm giá" className="">
+                  {coupons.map((cp) => {
+                    return (
+                      <SelectItem key={cp.value} value={cp.value}>
+                        {cp.label}
+                      </SelectItem>
+                    );
+                  })}
+                </Select>
+              </div>
+              {order && infoQR && (
+                <Image
+                  width={300}
+                  height={300}
+                  alt="NextUI hero Image"
+                  src={generateQRImage(
+                    order.payment_method,
+                    infoQR.account_number,
+                    infoQR.account_name,
+                    order.amount || 0,
+                    ""
+                  )}
+                />
+              )}
             </ModalBody>
             <ModalFooter>
               <Button color="danger" variant="light" onPress={onClose}>
                 Đóng
               </Button>
-              <Button color="primary" onPress={onSubmit} isLoading={loading}>
+              <Button
+                color="primary"
+                isDisabled={!paymentSelected}
+                onPress={() => {
+                  order &&
+                    onSubmit({
+                      room_id: order.room.id,
+                      coupon_code: null,
+                      order_id: order.id,
+                      payment_method: paymentMethods.find(
+                        (i) => i.id === paymentSelected
+                      )?.method as string,
+                    });
+                }}
+                isLoading={loading}
+              >
                 Đã Thanh Toán
               </Button>
             </ModalFooter>
