@@ -77,7 +77,7 @@ export default function SearchHeaderHome() {
           label=""
           placeholder="Nhập để tìm kiếm..."
           labelPlacement="outside"
-          className="w-[250px] "
+          className="w-[250px]  search-element"
           classNames={{
             inputWrapper: ["!bg-white"],
           }}
@@ -130,6 +130,7 @@ export default function SearchHeaderHome() {
       </div>
 
       <Button
+        className="group-button-element"
         variant="shadow"
         color="primary"
         size="md"
@@ -160,7 +161,7 @@ export default function SearchHeaderHome() {
         }}
       >
         <PlusIcon className="h-6 w-6 text-white " />
-        <span className="text-[13px] hidden sm:block">Đặt Nhóm Ngay</span>
+        <span className="text-[13px] hidden sm:block ">Đặt Nhóm Ngay</span>
       </Button>
       <ModalCreateRoom />
     </div>

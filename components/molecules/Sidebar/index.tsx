@@ -101,7 +101,7 @@ export default function Sidebar() {
             <MenuItem
               key={item.key}
               className={clsx(
-                "hover:text-[#fe724c] hover:bg-[#fe724c40] rounded-xl",
+                `hover:text-[#fe724c] hover:bg-[#fe724c40] rounded-xl nav-item-element-${item.key}`,
                 checkIsActive(item.pathRegex)
               )}
               onClick={item.onClick}

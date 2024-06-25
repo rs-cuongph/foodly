@@ -268,7 +268,7 @@ export default function ListDebtHistory() {
 
   const topContent = useMemo(() => {
     return (
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 list-history-header-element">
         <div className="flex justify-between gap-3 items-end">
           <div className="w-full max-w-[70%] flex gap-2 flex-wrap sm:flex-nowrap">
             <Input
@@ -445,7 +445,7 @@ export default function ListDebtHistory() {
   }, [page, searchByKey, sortDescriptor, statusesFilter]);
 
   return (
-    <div className="bg-white p-[15px] rounded-[10px]">
+    <div className="bg-white p-[15px] rounded-[10px] list-history-element">
       <Table
         aria-label="table"
         aria-labelledby="table"
