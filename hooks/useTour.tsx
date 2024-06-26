@@ -84,20 +84,6 @@ export const useTour = () => {
       },
     },
     {
-      element: ".button-confirm-element",
-      popover: {
-        title: "Nút xác nhận thanh toán",
-        description: "Click để thực hiện xác nhận đã thanh toán",
-      },
-    },
-    {
-      element: ".button-delete-element",
-      popover: {
-        title: "Nút xóa lịch sử",
-        description: "Click để thực hiện xóa lịch sử",
-      },
-    },
-    {
       element: ".nav-item-element-3",
       popover: {
         title: "Nhóm của tôi",
@@ -125,7 +111,7 @@ export const useTour = () => {
       popover: {
         title: "Chúc bạn có một trải nghiệm Foodly Booking vui vẻ!",
         onNextClick: () => {
-          localStorage.setItem("isFirstLogin", "false");
+          localStorage.setItem("isReadGuide", "1");
           driverObj.moveNext();
         },
       },

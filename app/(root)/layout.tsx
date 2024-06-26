@@ -4,7 +4,7 @@ import Header from "@/components/molecules/Header";
 import Main from "@/components/molecules/Main";
 import ModalLogin from "@/components/molecules/ModalLogin";
 import Sidebar from "@/components/molecules/Sidebar";
-import Contributors from "@/components/atoms/Contributors"
+import Contributors from "@/components/atoms/Contributors";
 import { useAppDispatch } from "@/hooks/stores.hook";
 import { getCurrentUser } from "@/provider/redux/thunk/auth.thunk";
 import authenticationSession from "@/shared/authenticationSession";
@@ -21,12 +21,14 @@ export default function RootLayout({
   const session = useSession();
   const [driverObj] = useTour();
   const dispatch = useAppDispatch();
-  const isFirstLogin = useRef<string | null>(null);
+  const isReadGuide = useRef<boolean | null>(null);
 
   useEffect(() => {
     if (typeof localStorage !== "undefined") {
-      if (localStorage.hasOwnProperty("isFirstLogin")) {
-        isFirstLogin.current = localStorage.getItem("isFirstLogin") ?? null;
+      if (localStorage.hasOwnProperty("isReadGuide")) {
+        isReadGuide.current = Boolean(localStorage.getItem("isReadGuide"));
+      } else {
+        isReadGuide.current = false;
       }
     }
   }, []);
@@ -40,8 +42,9 @@ export default function RootLayout({
 
     if (session.status === "authenticated") {
       dispatch(getCurrentUser());
-      if (isFirstLogin.current) return;
-      driverObj.drive();
+      if (location.pathname === "/home" && !isReadGuide.current) {
+        driverObj.drive();
+      }
     }
   }, [session]);
 

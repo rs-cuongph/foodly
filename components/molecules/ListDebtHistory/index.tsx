@@ -238,7 +238,8 @@ export default function ListDebtHistory() {
             >
               <PencilSquareIcon className="h-5 w-5 text-[#fe724c]" />
             </Button> */}
-            {["init", "processing, reviewing"].includes(order.status) && (
+
+            {["init", "processing", "reviewing"].includes(order.status) && (
               <Button
                 onClick={() => handleOpenModalConfirm(order)}
                 color="success"
@@ -249,7 +250,7 @@ export default function ListDebtHistory() {
               </Button>
             )}
 
-            {["init", "processing, reviewing"].includes(order.status) && (
+            {["init", "processing", "reviewing"].includes(order.status) && (
               <Button
                 onClick={() => handleOpenModalDelete(order)}
                 color="danger"
@@ -423,7 +424,10 @@ export default function ListDebtHistory() {
   }, [page, totalPage]);
 
   useEffect(() => {
-    dispatch(fetchListDebt(searchQuery));
+    dispatch(showLoading());
+    dispatch(fetchListDebt(searchQuery)).then(() => {
+      dispatch(hideLoading());
+    });
   }, [searchQuery]);
 
   useEffect(() => {

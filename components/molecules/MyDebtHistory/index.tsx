@@ -304,7 +304,10 @@ export default function MyDebtHistory(props: Props) {
   }, [page, totalPage]);
 
   useEffect(() => {
-    dispatch(fetchListMyOrder(searchQuery));
+    dispatch(showLoading());
+    dispatch(fetchListMyOrder(searchQuery)).then(() => {
+      dispatch(hideLoading());
+    });
   }, [searchQuery]);
 
   useEffect(() => {
@@ -356,7 +359,7 @@ export default function MyDebtHistory(props: Props) {
             )}
           </TableHeader>
           <TableBody
-            emptyContent={"Không có dữ liệu"}
+            emptyContent={!loading ? "Không có dữ liệu" : ""}
             items={debtList.data}
             loadingState={loading ? "loading" : "idle"}
             loadingContent={<Spinner />}

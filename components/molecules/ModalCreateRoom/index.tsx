@@ -58,7 +58,7 @@ export default function ModalCreateRoom({ editData }: CreateRoomProps) {
   const [users, setUsers] = useState<{ label: string; value: string }[]>([]);
   const onClose = () => {
     dispatch(setOpenModalCreateRoom(false));
-    driverObj.drive(4);
+    if (driverObj.isActive()) driverObj.drive(4);
   };
 
   const onSubmit = async (values: FormCreateRoomType) => {
@@ -258,10 +258,10 @@ export default function ModalCreateRoom({ editData }: CreateRoomProps) {
                 </ModalBody>
                 <ModalFooter className="modal-create-group-footer-element">
                   <Button color="danger" variant="light" onPress={onClose}>
-                    Close
+                    Đóng
                   </Button>
                   <Button color="primary" type="submit" isLoading={false}>
-                    Submit
+                    Lưu
                   </Button>
                 </ModalFooter>
               </form>
