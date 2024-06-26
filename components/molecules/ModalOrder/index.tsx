@@ -146,7 +146,12 @@ export default function ModalOrder({}: ModalOrderProps) {
           page: 1,
         })
       );
-
+      dispatch(
+        showNotify({
+          messages: "Cập nhật trạng thái thanh toán thành công",
+          type: "success",
+        })
+      );
       dispatch(setOpenModalOrder(false));
     }
     dispatch(hideLoading());

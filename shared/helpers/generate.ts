@@ -5,5 +5,17 @@ export function generateQRImage(
   amount: number,
   addInfo?: string
 ) {
-  return `https://img.vietqr.io/image/${bank}-${accountBank}-compact2.jpg?amount=${amount}&addInfo=${decodeURIComponent(addInfo ?? '')}&accountName=${decodeURIComponent(accountName ?? '')}`
+
+  const bankType = () => {
+    switch (bank) {
+      case "vpbank": {
+        return "vpb"
+      }
+      default: {
+        return bank;
+      }
+    }
+  }
+
+  return `https://img.vietqr.io/image/${bankType()}-${accountBank}-compact2.jpg?amount=${amount}&addInfo=${decodeURIComponent(addInfo ?? '')}&accountName=${decodeURIComponent(accountName ?? '')}`
 }

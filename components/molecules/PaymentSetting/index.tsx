@@ -10,6 +10,7 @@ import { PAYMENT_METHODS } from "@/shared/constants";
 import Image from "next/image";
 import CashImg from "@/public/bank-images/cash.png";
 import VcbImg from "@/public/bank-images/vietcombank.png";
+import VpbImg from "@/public/bank-images/vpbank.svg";
 import ControlledSelect from "@/components/atoms/ControlledSelect";
 import { useAppDispatch, useAppSelector } from "@/hooks/stores.hook";
 import {
@@ -17,7 +18,6 @@ import {
   showLoading,
 } from "@/provider/redux/reducer/common.reducer";
 import { updateUser } from "@/provider/redux/thunk/auth.thunk";
-import { v4 as uuidv4 } from "uuid";
 import { setPaymentSetting } from "@/provider/redux/reducer/auth.reducer";
 import { UserInfo } from "@/provider/redux/types/auth";
 import { capitalize } from "@/shared/helpers/capitalize";
@@ -48,6 +48,10 @@ export default function PaymentSetting(props: Props) {
       case "vietcombank":
         return (
           <Image width={50} height={50} src={VcbImg.src} alt="vietcombank" />
+        );
+      case "vpbank":
+        return (
+          <Image width={50} height={50} src={VpbImg.src} alt="vietcombank" />
         );
       default:
         return "";

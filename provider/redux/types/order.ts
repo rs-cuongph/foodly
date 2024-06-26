@@ -12,7 +12,7 @@ interface Creator {
     account_name: string;
     account_number: string;
     id: string;
-    method: "vietcombank" | "zalopay" | "momo" | "cash" | "";
+    method: "vietcombank" | "zalopay" | "momo" | "cash" | "vpbank" | "";
   }[];
 }
 
@@ -62,6 +62,11 @@ export interface ListOrderI {
 
 export interface ListOrderResponseI {
   data: Order[];
+  summary: {
+    total_quanlity?: number
+    total_amount?: number
+    bill?: number
+  };
   pagination: {
     page: number;
     total_record: number;

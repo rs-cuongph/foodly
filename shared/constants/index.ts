@@ -10,7 +10,7 @@ export const ROUTES = {
 
 export const PAGINATION_PARAMS = {
   DEFAULT_PAGE: 1,
-  DEFAULT_PAGE_SIZE: 10,
+  DEFAULT_PAGE_SIZE: 50,
 };
 
 export enum SHARE_SCOPE {
@@ -26,6 +26,10 @@ export const PAYMENT_METHODS = [
   {
     value: "vietcombank",
     label: "Vietcombank",
+  },
+  {
+    value: "vpbank",
+    label: "VP Bank",
   },
 ];
 

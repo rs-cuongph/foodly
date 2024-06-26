@@ -30,12 +30,14 @@ import {
   ChevronDownIcon,
   MagnifyingGlassIcon,
   PencilSquareIcon,
+  QrCodeIcon,
   QuestionMarkCircleIcon,
   TrashIcon,
 } from "@heroicons/react/24/solid";
 import { Order } from "@/provider/redux/types/order";
 import { useAppDispatch, useAppSelector } from "@/hooks/stores.hook";
 import {
+  confirmPaid,
   deleteOrder,
   fetchListOrder,
 } from "@/provider/redux/thunk/order.thunk";
@@ -52,7 +54,9 @@ import {
   setOrderIForModalOrder,
   setRoomIForModalOrder,
   showLoading,
+  showNotify,
 } from "@/provider/redux/reducer/common.reducer";
+import ModalQrPayment, { SubmitData } from "../ModalQrPayment";
 
 interface OrderTableProps {
   data: Room;
@@ -72,6 +76,8 @@ export default function OrderTable({ data }: OrderTableProps) {
     new Set(INITIAL_VISIBLE_COLUMNS)
   );
   const [isOpenModalDeleteOrder, setOpenModalDeleteOrder] = useState(false);
+  const [isOpenModalConfirm, setOpenModalConfirm] = useState(false);
+  const [orderPaid, setOrderPaid] = useState<Order | undefined>(undefined);
   const [statusFilter, setStatusFilter] = useState(
     new Set(statusOptions.map((i) => i.uid))
   );
@@ -96,6 +102,11 @@ export default function OrderTable({ data }: OrderTableProps) {
       Array.from(visibleColumns).includes(column.uid)
     );
   }, [visibleColumns]);
+
+  const handleOpenModalConfirmPaid = useCallback((order: Order) => {
+    setOrderPaid(order);
+    setOpenModalConfirm(true);
+  }, []);
 
   const renderCell = useCallback((order: Order, columnKey: string) => {
     switch (columnKey) {
@@ -156,6 +167,18 @@ export default function OrderTable({ data }: OrderTableProps) {
                 </Button>
               </>
             )}
+            {session.data?.user.authenticated_data.id !== data.creator.id &&
+              session.data?.user.authenticated_data.id === order.creator.id &&
+              order.status === "init" && (
+                <Button
+                  onClick={() => handleOpenModalConfirmPaid(order)}
+                  color="success"
+                  variant={"light"}
+                  isIconOnly
+                >
+                  <QrCodeIcon className="h-5 w-5 text-success" />
+                </Button>
+              )}
           </div>
         );
       default:
@@ -287,10 +310,11 @@ export default function OrderTable({ data }: OrderTableProps) {
             </Dropdown>
           </div>
         </div>
-        <div className="flex justify-between items-center">
-          <span className="text-default-400 text-small">
-            Tổng {orders.pagination.total_record} đơn
-          </span>
+        <div className="flex justify-between flex-col">
+          <p className="text-primary text-small">
+            Tổng: {orders.summary?.total_quanlity ?? 0} phần -{" "}
+            {formatCurrency(orders.summary?.total_amount, "")} vnđ
+          </p>
         </div>
       </div>
     );
@@ -331,6 +355,30 @@ export default function OrderTable({ data }: OrderTableProps) {
     }),
     []
   );
+
+  const onConfirmPaid = async (data: SubmitData) => {
+    if (!orderPaid) return;
+    dispatch(showLoading());
+    const res = await dispatch(
+      confirmPaid({
+        room_id: data.room_id,
+        order_id: data.order_id,
+        coupon_code: data.coupon_code,
+        payment_method: data.payment_method,
+      })
+    );
+    dispatch(hideLoading());
+    if (res.type === "order/confirm-paid/fulfilled") {
+      dispatch(
+        showNotify({
+          messages: "Cập nhật trạng thái thanh toán thành công",
+          type: "success",
+        })
+      );
+      dispatch(fetchListOrder(searchQuery));
+      setOpenModalConfirm(false);
+    }
+  };
 
   return (
     <div>
@@ -381,6 +429,12 @@ export default function OrderTable({ data }: OrderTableProps) {
         onSubmit={onDeleteOrder}
       />
       <ModalOrder />
+      <ModalQrPayment
+        open={isOpenModalConfirm}
+        setOpen={setOpenModalConfirm}
+        order={orderPaid}
+        onSubmit={(data) => onConfirmPaid(data)}
+      />
     </div>
   );
 }

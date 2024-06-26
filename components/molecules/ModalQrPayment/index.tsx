@@ -49,13 +49,16 @@ export default function ModalQrPayment({
   }, [rest]);
 
   const paymentMethods = useMemo(() => {
-    console.log(order?.room?.creator);
     return order?.room?.creator?.payment_setting ?? [];
   }, [order]);
 
   const infoQR = useMemo(() => {
-    return paymentMethods.find((i) => i.method === order?.payment_method);
-  }, [paymentMethods]);
+    return paymentMethods.find((i) => i.id === paymentSelected);
+  }, [paymentMethods, paymentSelected]);
+
+  const contentPayment = useMemo(() => {
+    return `${order?.id} `;
+  }, [order]);
 
   const handleSelectionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setPaymentSelected(e.target.value);
@@ -107,11 +110,11 @@ export default function ModalQrPayment({
                   height={300}
                   alt="NextUI hero Image"
                   src={generateQRImage(
-                    order.payment_method,
+                    infoQR.method,
                     infoQR.account_number,
                     infoQR.account_name,
                     order.amount || 0,
-                    ""
+                    contentPayment
                   )}
                 />
               )}

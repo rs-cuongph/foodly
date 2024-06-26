@@ -120,7 +120,7 @@ export default function MyDebtHistory(props: Props) {
       })
     );
     dispatch(hideLoading());
-    if (res.type === "order/admin-group-accept-order/fulfilled") {
+    if (res.type === "order/confirm-paid/fulfilled") {
       dispatch(
         showNotify({
           messages: "Cập nhật trạng thái thanh toán thành công",
@@ -273,9 +273,13 @@ export default function MyDebtHistory(props: Props) {
           </div>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-default-400 text-small">
-            Tổng {debtList.pagination.total_record} bản ghi
-          </span>
+          <p className="text-default-400 text-small">
+            {debtList.summary?.total_quanlity ?? 0} phần -{" "}
+            {formatCurrency(debtList.summary?.total_amount, "")} vnđ -{" "}
+            <span className="text-red-500">
+              {formatCurrency(debtList.summary?.bill, "")} vnđ (chưa thanh toán)
+            </span>
+          </p>
         </div>
       </div>
     );
