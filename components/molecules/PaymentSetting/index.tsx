@@ -21,6 +21,7 @@ import { updateUser } from "@/provider/redux/thunk/auth.thunk";
 import { setPaymentSetting } from "@/provider/redux/reducer/auth.reducer";
 import { UserInfo } from "@/provider/redux/types/auth";
 import { capitalize } from "@/shared/helpers/capitalize";
+import { lowerCase } from "lodash";
 
 interface Props {}
 export default function PaymentSetting(props: Props) {
@@ -66,6 +67,7 @@ export default function PaymentSetting(props: Props) {
           ...(userInfo?.payment_setting as FormPaymentSettingType[]),
           {
             ...values,
+            method: lowerCase(values.method),
             account_name: capitalize(values.account_name),
           },
         ],
@@ -93,7 +95,7 @@ export default function PaymentSetting(props: Props) {
             key={setting.id}
           >
             <p className="text-[14px]">
-              <strong>Phương thức:</strong> {setting.method}
+              <strong>Phương thức:</strong> {setting.method?.toUpperCase()}
             </p>
             {setting.method !== "cash" && (
               <p className="text-[14px]">
