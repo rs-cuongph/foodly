@@ -46,6 +46,11 @@ const initialState: OrderState = {
   error: null,
   orders: {
     data: [],
+    summary: {
+      bill: undefined,
+      total_amount: undefined,
+      total_quanlity: undefined,
+    },
     pagination: {
       page: 1,
       total_record: 0,
