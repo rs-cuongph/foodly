@@ -121,7 +121,11 @@ export default function ListDebtHistory() {
   }, [visibleColumns]);
 
   const statusesSelected = useMemo(
-    () => Array.from(statusesFilter).join(", ").replaceAll("_", " "),
+    () =>
+      Array.from(statusesFilter)
+        .map((i) => statusOptions.find((k) => k.uid === i)?.name)
+        .join(", ")
+        .replaceAll("_", " "),
     [statusesFilter]
   );
 
