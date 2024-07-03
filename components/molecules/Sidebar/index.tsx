@@ -27,8 +27,9 @@ export default function Sidebar() {
   const handleLoginLogout = useCallback(() => {
     if (session.status === "authenticated") {
       signOut({
-        redirect: true,
+        redirect: false,
       });
+      router.replace(ROUTES.HOME);
     } else {
       dispatch(setOpenModalLogin(true));
     }

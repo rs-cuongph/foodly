@@ -20,6 +20,10 @@ export const useTour = () => {
       popover: {
         title: "FOODLY BOOKING",
         description: "Chào mừng bạn đến với FOODLY BOOKING!",
+        onNextClick: () => {
+          localStorage.setItem("isReadGuide", "1");
+          driverObj.moveNext();
+        },
       },
     },
     {
@@ -37,6 +41,7 @@ export const useTour = () => {
         onNextClick: () => {
           dispatch(setOpenModalCreateRoom(true));
           delay(function () {
+            localStorage.setItem("isReadGuide", "1");
             driverObj.moveNext();
           }, 10);
         },
@@ -111,7 +116,6 @@ export const useTour = () => {
       popover: {
         title: "Chúc bạn có một trải nghiệm Foodly Booking vui vẻ!",
         onNextClick: () => {
-          localStorage.setItem("isReadGuide", "1");
           driverObj.moveNext();
         },
       },
