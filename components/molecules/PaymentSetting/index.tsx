@@ -3,7 +3,7 @@ import { Button } from "@nextui-org/react";
 import classes from "./index.module.css";
 import { useSession } from "next-auth/react";
 import { useEffect, useMemo, useState } from "react";
-import { BanknotesIcon, PlusIcon } from "@heroicons/react/24/solid";
+import { BanknotesIcon, PlusIcon, XCircleIcon } from "@heroicons/react/24/solid";
 import ControlledInput from "@/components/atoms/ControlledInput";
 import { FormPaymentSettingType, usePaymentSettingForm } from "./validate";
 import { PAYMENT_METHODS } from "@/shared/constants";
@@ -58,28 +58,46 @@ export default function PaymentSetting(props: Props) {
         return "";
     }
   };
-
-  const onSubmit = async (values: FormPaymentSettingType) => {
-    dispatch(showLoading());
+  
+  const updatePaymentSetting = async (payment_setting: FormPaymentSettingType[]) => {
     const res = await dispatch(
       updateUser({
-        payment_setting: [
-          ...(userInfo?.payment_setting as FormPaymentSettingType[]),
-          {
-            ...values,
-            method: lowerCase(values.method),
-            account_name: capitalize(values.account_name),
-          },
-        ],
+        payment_setting
       })
     );
     if (res.type === "auth/update-user-info/fulfilled") {
       dispatch(
         setPaymentSetting((res.payload as UserInfo["info"]).payment_setting)
       );
+    }
+    return res
+  }
+
+  const onSubmit = async (values: FormPaymentSettingType) => {
+    dispatch(showLoading());
+    const res = await updatePaymentSetting([
+      ...(userInfo?.payment_setting as FormPaymentSettingType[]),
+      {
+        ...values,
+        method: lowerCase(values.method),
+        account_name: capitalize(values.account_name),
+      },
+    ])
+    
+    if (res.type === "auth/update-user-info/fulfilled") {
       reset();
       setOpenBlockAddPayment(false);
     }
+    dispatch(hideLoading());
+  };
+  
+  const deletePaymentMethod = async(methodId: string) => {
+    dispatch(showLoading());
+    await updatePaymentSetting(
+      [
+        ...(userInfo?.payment_setting.filter((payment) => payment.id !== methodId) as FormPaymentSettingType[]),
+      ]
+    );
     dispatch(hideLoading());
   };
 
@@ -90,19 +108,21 @@ export default function PaymentSetting(props: Props) {
       </h3>
       <div className="flex gap-2 flex-col">
         {(userInfo?.payment_setting || []).map((setting) => (
-          <div
-            className="px-4 py-2 w-fit rounded-[12px] bg-[#e4e4e7]"
-            key={setting.id}
-          >
-            <p className="text-[14px]">
-              <strong>Phương thức:</strong> {setting.method?.toUpperCase()}
-            </p>
-            {setting.method !== "cash" && (
+          <div key={setting.id} className="flex items-center">
+            <div
+              className="px-4 py-2 w-fit rounded-[12px] bg-[#e4e4e7]"
+            >
               <p className="text-[14px]">
-                <strong>Tên/Số thẻ:</strong> {setting.account_name} /{" "}
-                {setting.account_number}
+                <strong>Phương thức:</strong> {setting.method?.toUpperCase()}
               </p>
-            )}
+              {setting.method !== "cash" && (
+                <p className="text-[14px]">
+                  <strong>Tên/Số thẻ:</strong> {setting.account_name} /{" "}
+                  {setting.account_number}
+                </p>
+              )}
+            </div>
+            <XCircleIcon onClick={() => deletePaymentMethod(setting.id)} className="h-6 w-6 text-red-500 cursor-pointer ml-2" />
           </div>
         ))}
       </div>
