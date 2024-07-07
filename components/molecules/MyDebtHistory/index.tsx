@@ -113,8 +113,8 @@ export default function MyDebtHistory(props: Props) {
     dispatch(showLoading());
     const res = await dispatch(
       confirmPaid({
-        room_id: data.room_id,
-        order_id: data.order_id,
+        room_id: data.room_id as string,
+        order_id: data.order_id as string,
         coupon_code: data.coupon_code,
         payment_method: data.payment_method,
       })
