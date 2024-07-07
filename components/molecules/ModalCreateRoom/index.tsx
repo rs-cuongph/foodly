@@ -4,19 +4,11 @@ import dayjs from "dayjs";
 import { useAppDispatch, useAppSelector } from "@/hooks/stores.hook";
 import {
   Button,
-  Input,
-  Link,
   Modal,
   ModalBody,
   ModalContent,
   ModalFooter,
   ModalHeader,
-  Radio,
-  RadioGroup,
-  Select,
-  SelectItem,
-  Switch,
-  Textarea,
 } from "@nextui-org/react";
 import { useEffect, useState } from "react";
 import { FormCreateRoomType, useCreateRoomForm } from "./validate";
@@ -31,10 +23,10 @@ import {
   editRoom,
   fetchListRoom,
   fetchListUser,
+  fetchRoomDetail,
 } from "@/provider/redux/thunk/room.thunk";
 import { useSession } from "next-auth/react";
 import { setOpenModalCreateRoom } from "@/provider/redux/reducer/room.reducer";
-import { delay } from "lodash";
 import ControlledInput from "@/components/atoms/ControlledInput";
 import ControlledTextarea from "@/components/atoms/ControlledTextarea";
 import { Room } from "@/provider/redux/types/room";
@@ -46,7 +38,7 @@ interface CreateRoomProps {
 
 export default function ModalCreateRoom({ editData }: CreateRoomProps) {
   const [mode, setMode] = useState(false);
-  const session = useSession();
+  const loading = useAppSelector((state) => state.common.loading);
   const dispatch = useAppDispatch();
   const [driverObj] = useTour();
   const form = useCreateRoomForm();
@@ -56,6 +48,7 @@ export default function ModalCreateRoom({ editData }: CreateRoomProps) {
     form;
   const { errors } = formState;
   const [users, setUsers] = useState<{ label: string; value: string }[]>([]);
+
   const onClose = () => {
     dispatch(setOpenModalCreateRoom(false));
     if (driverObj.isActive()) driverObj.drive(4);
@@ -100,19 +93,30 @@ export default function ModalCreateRoom({ editData }: CreateRoomProps) {
       //
     } else {
       onClose();
-      await Promise.all([
-        dispatch(
-          fetchListRoom({
-            page: 1,
-          })
-        ),
+      const promises: any[] = [
         dispatch(
           showNotify({
             messages: editData ? "Sửa thành công" : "Tạo thành công",
             type: "success",
           })
         ),
-      ]);
+      ];
+      if (location.pathname === "/home") {
+        promises.push(
+          dispatch(
+            fetchListRoom({
+              page: 1,
+            })
+          )
+        );
+      }
+      if (location.pathname.startsWith("/orders/") && editData) {
+        promises.push(
+          dispatch(fetchRoomDetail(editData.id as string))
+        );
+      }
+
+      await Promise.all(promises);
     }
     dispatch(hideLoading());
   };
@@ -260,7 +264,7 @@ export default function ModalCreateRoom({ editData }: CreateRoomProps) {
                   <Button color="danger" variant="light" onPress={onClose}>
                     Đóng
                   </Button>
-                  <Button color="primary" type="submit" isLoading={false}>
+                  <Button color="primary" type="submit" isLoading={loading}>
                     Lưu
                   </Button>
                 </ModalFooter>

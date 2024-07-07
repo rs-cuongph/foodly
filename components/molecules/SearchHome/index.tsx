@@ -28,9 +28,12 @@ import { useSession } from "next-auth/react";
 import { showNotify } from "@/provider/redux/reducer/common.reducer";
 import { setOpenModalLogin } from "@/provider/redux/reducer/auth.reducer";
 import { PlusIcon } from "@heroicons/react/24/solid";
-import clsx from "clsx";
 
-export default function SearchHeaderHome() {
+export default function SearchHeaderHome({
+  hiddenBtnCreateGroup = false,
+}: {
+  hiddenBtnCreateGroup?: boolean;
+}) {
   const dispatch = useAppDispatch();
   const session = useSession();
   const userInfo = useAppSelector((state) => state.auth.userInfo);
@@ -129,41 +132,45 @@ export default function SearchHeaderHome() {
         </Dropdown> */}
       </div>
 
-      <Button
-        className="group-button-element"
-        variant="shadow"
-        color="primary"
-        size="md"
-        onClick={() => {
-          if (session.status === "authenticated") {
-            if (!userInfo?.payment_setting.length)
-              dispatch(
-                showNotify({
-                  messages:
-                    "vui lòng thêm phương thức thanh toán. (Tôi -> Cài đặt thanh toán)",
-                  type: "warning",
-                  duration: 2000,
-                })
-              );
-            else {
-              dispatch(setOpenModalCreateRoom(true));
-            }
-          } else {
-            dispatch(
-              showNotify({
-                messages: "vui lòng đăng nhập trước",
-                type: "warning",
-                duration: 2000,
-              })
-            );
-            dispatch(setOpenModalLogin(true));
-          }
-        }}
-      >
-        <PlusIcon className="h-6 w-6 text-white " />
-        <span className="text-[13px] hidden sm:block ">Đặt Nhóm Ngay</span>
-      </Button>
-      <ModalCreateRoom />
+      {!hiddenBtnCreateGroup && (
+        <>
+          <Button
+            className="group-button-element"
+            variant="shadow"
+            color="primary"
+            size="md"
+            onClick={() => {
+              if (session.status === "authenticated") {
+                if (!userInfo?.payment_setting.length)
+                  dispatch(
+                    showNotify({
+                      messages:
+                        "vui lòng thêm phương thức thanh toán. (Tôi -> Cài đặt thanh toán)",
+                      type: "warning",
+                      duration: 2000,
+                    })
+                  );
+                else {
+                  dispatch(setOpenModalCreateRoom(true));
+                }
+              } else {
+                dispatch(
+                  showNotify({
+                    messages: "vui lòng đăng nhập trước",
+                    type: "warning",
+                    duration: 2000,
+                  })
+                );
+                dispatch(setOpenModalLogin(true));
+              }
+            }}
+          >
+            <PlusIcon className="h-6 w-6 text-white " />
+            <span className="text-[13px] hidden sm:block ">Đặt Nhóm Ngay</span>
+          </Button>
+          <ModalCreateRoom />
+        </>
+      )}
     </div>
   );
 }

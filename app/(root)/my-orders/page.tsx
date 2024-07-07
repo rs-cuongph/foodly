@@ -23,10 +23,11 @@ export default function MyOrdersPage() {
 
   return (
     <>
-      <SearchHeaderHome />
+      <SearchHeaderHome hiddenBtnCreateGroup={true} />
       <div className="mt-5">
         <MyGroupOrderList />
       </div>
+      <ModalOrder />
     </>
   );
 }

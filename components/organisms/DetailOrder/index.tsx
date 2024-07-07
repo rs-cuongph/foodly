@@ -57,6 +57,7 @@ import { setOpenModalCreateRoom } from "@/provider/redux/reducer/room.reducer";
 import OrderTable from "../../molecules/OrderTable";
 import ModalDeleteRoom from "@/components/molecules/ModalDelete";
 import { formatCurrency } from "@/shared/helpers/currency";
+import clsx from "clsx";
 
 export default function DetailOrder() {
   const router = useRouter();
@@ -64,6 +65,7 @@ export default function DetailOrder() {
   const { id } = useParams();
   const dispatch = useAppDispatch();
   const [_, copy] = useCopyToClipboard();
+  const [isShowMore, setShowMore] = useState(false);
   const [isOpenModalDeleteRoom, setOpenModalDeleteRoom] = useState(false);
   const currentUser = useAppSelector((state) => state.auth.userInfo);
   const { room, isFetchingRoom: isLoading } = useAppSelector(
@@ -222,7 +224,24 @@ export default function DetailOrder() {
                   </Money>
                 </div>
                 <h3>{room.name}</h3>
-                <p>{room.description}</p>
+                <div className="relative">
+                  <div className={
+                    clsx('overflow-hidden', isShowMore ? '' : 'h-[180px] [mask-image:linear-gradient(180deg,_#000_calc(100%_-_40px),_transparent)]')
+                  }>
+                    {room.description.split("\n")?.map((_item, index) => {
+                      return (
+                        <p key={index} className="line-clamp-2">
+                          - {_item.replace("-", "")}
+                        </p>
+                      );
+                    })}
+                  </div>
+                  <span className="absolute bottom-0 left-[50%] [transform:translatex(-50%)] text-sm font-normal cursor-pointer" onClickCapture={() => {
+                    setShowMore(prev => !prev)
+                  }}>
+                    {isShowMore ? 'rút gọn' : 'xem thêm'}
+                  </span>
+                </div>
               </div>
               {isMobile ? renderMoreItem() : <></>}
             </div>

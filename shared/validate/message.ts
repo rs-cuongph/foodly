@@ -33,7 +33,7 @@ export const MESSAGES = {
   MSG_006: "Password must contain at least 1 lowercase letter and 1 number.",
   MSG_007: "Please check the checkbox.",
   MSG_008: "Please enter ${field} in hiragana.",
-  MSG_009: "Password and confirm password do not match.",
+  MSG_009: "Mật khẩu và mật khẩu xác nhận không khớp.",
   MSG_010: "Emoticons are not allowed.",
   MSG_014: "This tag has already been added before.",
   MSG_015: "You can only add up to 10 tags.",

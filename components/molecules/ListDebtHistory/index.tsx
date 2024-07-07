@@ -109,7 +109,6 @@ export default function ListDebtHistory() {
   }, []);
 
   const handleOpenModalDelete = useCallback((order: Order) => {
-    if (order.status !== "processing") return;
     setOrder(order);
     setOpenModalDeleteOrder(true);
   }, []);
