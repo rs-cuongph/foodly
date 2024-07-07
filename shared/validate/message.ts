@@ -3,8 +3,7 @@ export const LABEL = {
     email: "email",
     password: "mật khẩu",
     re_password: "xác nhận mật khẩu",
-    first_name: "họ",
-    last_name: "tên",
+    username: "tên người dùng",
   },
   room: {
     name: "tên",

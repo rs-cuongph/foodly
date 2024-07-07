@@ -8,8 +8,7 @@ export type FormSignIn = {
 export type FormSignUp = {
   email: string;
   password: string;
-  first_name?: string;
-  last_name?: string;
+  username?: string;
 };
 
 export type FormUpdateUser = {

@@ -8,8 +8,7 @@ type FormLoginType = {
   email: string;
   password: string;
   re_password?: string;
-  first_name?: string;
-  last_name?: string;
+  username?: string;
 };
 
 const useLoginForm = () => {
@@ -26,20 +25,13 @@ const useLoginForm = () => {
             is: (value: boolean) => !value,
             then: (schema) => schema.required().sameAs("password"),
           }),
-        first_name: yup
+        username: yup
           .string()
           .when("is_sign_in", {
             is: (value: boolean) => !value,
             then: (schema) => schema.max(255),
           })
-          .label("loginForm.first_name"),
-        last_name: yup
-          .string()
-          .when("is_sign_in", {
-            is: (value: boolean) => !value,
-            then: (schema) => schema.max(255),
-          })
-          .label("loginForm.last_name"),
+          .label("loginForm.username"),
       }),
     []
   );

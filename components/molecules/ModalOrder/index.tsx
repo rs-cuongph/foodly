@@ -88,7 +88,7 @@ export default function ModalOrder({}: ModalOrderProps) {
 
   const callApiToCreateNewOrder = useCallback(async () => {
     if (!room) return;
-    const res = await dispatch(
+    const res: any = await dispatch(
       createOrder({
         room_id: room.id,
         content: foodSelected.join(", "),
@@ -101,6 +101,13 @@ export default function ModalOrder({}: ModalOrderProps) {
     );
 
     if (res.type === "order/create/rejected") {
+      dispatch(
+        showNotify({
+          messages: res.error?.message,
+          type: "error",
+          duration: 3000,
+        })
+      );
     } else {
       setOrder(res.payload as Order);
       setStep(2);

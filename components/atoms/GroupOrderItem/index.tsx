@@ -35,23 +35,25 @@ import {
   showNotify,
 } from "@/provider/redux/reducer/common.reducer";
 import { Chip } from "@nextui-org/react";
+import dayjs from "dayjs";
 
 interface OrderItemProps {
   data: Room;
 }
 
 export default function GroupOrderItem({ data }: OrderItemProps) {
-  const [time, setTime] = useState(getTimeFromNow(data.public_time_end));
+  const [time, setTime] = useState(dayjs().isSameOrAfter(data.public_time_start) ? getTimeFromNow(data.public_time_end) : 0);
   const dispatch = useAppDispatch();
   const session = useSession();
   const router = useRouter();
 
   useEffect(() => {
+    if(!dayjs().isSameOrAfter(data.public_time_start)) return
     const intervalId = setInterval(() => {
       setTime(getTimeFromNow(data.public_time_end));
     }, 1000);
     return () => clearInterval(intervalId);
-  }, [data.public_time_end]);
+  }, [data.public_time_end, data.public_time_start]);
 
   const goToDetail = useCallback(() => {
     router.push(

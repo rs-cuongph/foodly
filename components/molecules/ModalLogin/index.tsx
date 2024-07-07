@@ -67,8 +67,7 @@ export default function ModalLogin() {
         signUp({
           email: values.email,
           password: values.password,
-          first_name: values.first_name,
-          last_name: values.last_name,
+          username: values.username,
         })
       );
       dispatch(hideLoading());
@@ -107,8 +106,7 @@ export default function ModalLogin() {
     reset({
       email: "",
       password: "",
-      first_name: undefined,
-      last_name: undefined,
+      username: undefined,
       is_sign_in: getValues("is_sign_in"),
     });
   }, [watch("is_sign_in"), reset, getValues]);
@@ -189,27 +187,17 @@ export default function ModalLogin() {
                     )}
                     {!getValues("is_sign_in") && (
                       <Input
-                        label="Họ và tên đệm"
+                        label="Tên người dùng"
                         labelPlacement={"outside"}
-                        placeholder="Nhập họ và tên đệm"
+                        placeholder="Nhập tên hiển thị"
                         type="text"
                         className=""
-                        isInvalid={!!errors?.first_name?.message?.length}
-                        errorMessage={errors?.first_name?.message}
-                        {...register("first_name")}
+                        isInvalid={!!errors?.username?.message?.length}
+                        errorMessage={errors?.username?.message}
+                        {...register("username")}
                       />
                     )}
-                    {!getValues("is_sign_in") && (
-                      <Input
-                        label="Tên"
-                        labelPlacement={"outside"}
-                        placeholder="Nhập tên"
-                        type="text"
-                        {...register("last_name")}
-                        isInvalid={!!errors?.last_name?.message?.length}
-                        errorMessage={errors?.last_name?.message}
-                      />
-                    )}
+                   
                   </div>
                   <p className="mt-5 text-center text-[13px]">
                     {getValues("is_sign_in")

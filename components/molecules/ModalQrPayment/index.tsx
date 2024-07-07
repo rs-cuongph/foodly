@@ -22,9 +22,9 @@ import {
 } from "react";
 
 export interface SubmitData {
-  room_id: string;
-  order_id: string;
-  coupon_code: string | null;
+  room_id?: string;
+  order_id?: string;
+  coupon_code?: string | null;
   payment_method: string;
 }
 interface ModalQrPaymentProps {
@@ -129,9 +129,9 @@ export default function ModalQrPayment({
                 onPress={() => {
                   order &&
                     onSubmit({
-                      room_id: order.room.id,
+                      room_id: order.room?.id,
                       coupon_code: null,
-                      order_id: order.id,
+                      order_id: order?.id,
                       payment_method: paymentMethods.find(
                         (i) => i.id === paymentSelected
                       )?.method as string,
