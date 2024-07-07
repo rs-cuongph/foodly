@@ -278,9 +278,9 @@ export default function MyDebtHistory(props: Props) {
             {formatCurrency(debtList.summary?.total_amount, "")} vnđ -{" "}
             <span className="text-red-500">
               {formatCurrency(debtList.summary?.bill, "")} vnđ (chưa thanh toán)
-              {debtList.summary?.bill && <Button color="success" variant="flat" className="ml-2">
+              {/* {debtList.summary?.bill && <Button color="success" variant="flat" className="ml-2">
                 Thanh Toán Ngay
-              </Button>  }
+              </Button>  } */}
             </span>
           </p>
         </div>
