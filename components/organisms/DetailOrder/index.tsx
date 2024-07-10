@@ -174,7 +174,11 @@ export default function DetailOrder() {
     return () => clearInterval(intervalId);
   }, [room.public_time_end]);
 
+  const lengthDescription = useMemo(() => room.description.split("\n")?.length ?? 0, [room])
+
+
   if (isLoading) return <Spinner />;
+
 
   return (
     <DetailOrderStyled className="w-[100%]">
@@ -226,7 +230,7 @@ export default function DetailOrder() {
                 <h3>{room.name}</h3>
                 <div className="relative">
                   <div className={
-                    clsx('overflow-hidden', isShowMore ? '' : 'h-[180px] [mask-image:linear-gradient(180deg,_#000_calc(100%_-_40px),_transparent)]')
+                    clsx('overflow-hidden', isShowMore ? '' : lengthDescription >= 7 ? 'h-[180px] [mask-image:linear-gradient(180deg,_#000_calc(100%_-_40px),_transparent)]' : '')
                   }>
                     {room.description.split("\n")?.map((_item, index) => {
                       return (
@@ -236,11 +240,11 @@ export default function DetailOrder() {
                       );
                     })}
                   </div>
-                  <span className="absolute bottom-0 left-[50%] [transform:translatex(-50%)] text-sm font-normal cursor-pointer" onClickCapture={() => {
+                  {lengthDescription >= 7 && <span className="absolute bottom-0 left-[50%] [transform:translatex(-50%)] text-sm font-normal cursor-pointer" onClickCapture={() => {
                     setShowMore(prev => !prev)
                   }}>
                     {isShowMore ? 'rút gọn' : 'xem thêm'}
-                  </span>
+                  </span>}
                 </div>
               </div>
               {isMobile ? renderMoreItem() : <></>}

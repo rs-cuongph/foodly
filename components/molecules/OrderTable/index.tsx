@@ -168,16 +168,22 @@ export default function OrderTable({ data }: OrderTableProps) {
               </>
             )}
             {session.data?.user.authenticated_data.id !== data.creator.id &&
-              session.data?.user.authenticated_data.id === order.creator.id &&
-              order.status === "init" && (
-                <Button
-                  onClick={() => handleOpenModalConfirmPaid(order)}
-                  color="success"
-                  variant={"light"}
-                  isIconOnly
-                >
-                  <QrCodeIcon className="h-5 w-5 text-success" />
-                </Button>
+              session.data?.user.authenticated_data.id === order.creator.id && (
+                <>
+                  {order.status === "init" && (
+                    <Button
+                      onClick={() => handleOpenModalConfirmPaid(order)}
+                      color="success"
+                      variant={"light"}
+                      isIconOnly
+                    >
+                      <QrCodeIcon className="h-5 w-5 text-success" />
+                    </Button>
+                  )}
+                  <Tooltip content="Không thể huỷ đơn,vui lòng liên hệ chủ nhóm để yêu cầu huỷ" showArrow={true}>
+                    <TrashIcon className="h-5 w-5 text-red-500 cursor-pointer opacity-50" />
+                  </Tooltip>
+                </>
               )}
           </div>
         );
